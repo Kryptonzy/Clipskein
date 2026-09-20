@@ -3062,9 +3062,13 @@ final class ClipStore: ObservableObject {
     currentItems: [ClipItem]
   ) {
     guard !previousItems.isEmpty else { return }
-    let currentByID = Dictionary(uniqueKeysWithValues: currentItems.map { ($0.id, $0) })
+    // Index positions instead of retaining a second full copy of every wide ClipItem.
+    let currentByID = Dictionary(uniqueKeysWithValues: currentItems.indices.map {
+      (currentItems[$0].id, $0)
+    })
     let removedOrChanged = Set(previousItems.compactMap { previous -> UUID? in
-      guard let current = currentByID[previous.id] else { return previous.id }
+      guard let index = currentByID[previous.id] else { return previous.id }
+      let current = currentItems[index]
       guard !current.isConcealed else { return previous.id }
       return Self.semanticSourceChanged(from: previous, to: current) ? previous.id : nil
     })
@@ -5772,12 +5776,19 @@ final class ClipStore: ObservableObject {
 
     let maximumItems = preferences.itemLimit
     guard items.count > maximumItems else { return }
-    let removable = items.indices.reversed().filter { !items[$0].isPinned }
-    for index in removable.prefix(items.count - maximumItems) {
-      let item = items[index]
-      removeStoredFile(for: item)
-      removedIDs.insert(item.id)
-      items.remove(at: index)
+    // Visit only as much of the oldest tail as needed. Deleting from the end
+    // leaves every lower index valid and keeps pinned clips even above the limit.
+    var remaining = items.count - maximumItems
+    var index = items.count - 1
+    while index >= 0, remaining > 0 {
+      if !items[index].isPinned {
+        let item = items[index]
+        removeStoredFile(for: item)
+        removedIDs.insert(item.id)
+        items.remove(at: index)
+        remaining -= 1
+      }
+      index -= 1
     }
   }
 
