@@ -25,18 +25,18 @@ enum ArchiveController {
     panel.allowedContentTypes = [.data]
     panel.nameFieldStringValue = L10n.format(
       "archive.export.default_name",
-      fallback: "ClipNest Backup.%@",
+      fallback: "Clipskein Backup.%@",
       ClipArchive.fileExtension)
     panel.message = L10n.text(
       "archive.export.panel_message",
-      fallback: "Save an encrypted backup of your complete ClipNest history.")
+      fallback: "Save an encrypted backup of your complete Clipskein history.")
     guard panel.runModal() == .OK, let url = panel.url else { return }
 
     let progress = ArchiveProgressPanel(
       title: L10n.text("archive.progress.export_title", fallback: "Creating encrypted backup"),
       detail: L10n.text(
         "archive.progress.export_detail",
-        fallback: "Reading local attachments and encrypting them. ClipNest stays usable."
+        fallback: "Reading local attachments and encrypting them. Clipskein stays usable."
       )
     )
     beginOperation(progress: progress)
@@ -73,7 +73,7 @@ enum ArchiveController {
     panel.message = L10n.text(
       "archive.import.panel_message",
       fallback:
-        "Choose an encrypted ClipNest archive to merge with your history. Your history size and retention limits still apply."
+        "Choose an encrypted Clipskein archive to merge with your history. Your history size and retention limits still apply."
     )
     guard panel.runModal() == .OK, let url = panel.url else { return }
     guard let password = requestPassword(confirm: false) else { return }
@@ -204,7 +204,7 @@ enum ArchiveController {
         confirm
         ? L10n.text(
           "archive.protect_detail",
-          fallback: "Use at least 8 characters. ClipNest cannot recover a forgotten password.")
+          fallback: "Use at least 8 characters. Clipskein cannot recover a forgotten password.")
         : L10n.text(
           "archive.unlock_detail", fallback: "Enter the password used when this backup was created."
         )
@@ -264,7 +264,7 @@ enum ArchiveController {
     alert.informativeText = L10n.text(
       "archive.export.success_detail",
       fallback:
-        "Text, images, OCR, usage history, Stack, Pinboards, and saved views were encrypted and saved. Keep the password separately; ClipNest cannot recover it."
+        "Text, images, OCR, usage history, Stack, Pinboards, and saved views were encrypted and saved. Keep the password separately; Clipskein cannot recover it."
     )
     alert.addButton(withTitle: L10n.text("archive.show_finder", fallback: "Show in Finder"))
     alert.addButton(withTitle: L10n.text("archive.done", fallback: "Done"))

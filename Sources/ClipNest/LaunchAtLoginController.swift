@@ -30,7 +30,7 @@ final class LaunchAtLoginController: ObservableObject {
     case .off: "Off"
     case .on: "On"
     case .requiresApproval: "Approval required"
-    case .unavailable: "Available after installing ClipNest.app"
+    case .unavailable: "Available after installing Clipskein.app"
     }
   }
 

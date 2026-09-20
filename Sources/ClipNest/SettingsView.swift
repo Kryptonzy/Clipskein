@@ -78,7 +78,7 @@ struct SettingsView: View {
           Text(
             t(
               "settings.capture_files.detail",
-              "ClipNest remembers local file locations, not copies of the file contents."
+              "Clipskein remembers local file locations, not copies of the file contents."
             )
           )
           .font(.caption)
@@ -103,7 +103,7 @@ struct SettingsView: View {
           Text(
             t(
               "settings.watch_screenshots.detail",
-              "Watches the screenshot folder configured by macOS. Existing files are ignored; only new screenshots are copied into ClipNest and read locally with OCR."
+              "Watches the screenshot folder configured by macOS. Existing files are ignored; only new screenshots are copied into Clipskein and read locally with OCR."
             )
           )
           .font(.caption)
@@ -487,7 +487,7 @@ struct SettingsView: View {
           Text(
             t(
               "settings.authenticate_concealed.detail",
-              "Uses Touch ID when available, with this Mac’s password as fallback. Authorization lasts five minutes and visible previews hide when ClipNest loses focus."
+              "Uses Touch ID when available, with this Mac’s password as fallback. Authorization lasts five minutes and visible previews hide when Clipskein loses focus."
             )
           )
           .font(.caption)
@@ -725,7 +725,7 @@ struct SettingsView: View {
             Text(
               t(
                 "settings.storage.detail",
-                "ClipNest inspects only file names and sizes inside its local Application Support folder. Clipboard contents never leave this Mac."
+                "Clipskein inspects only file names and sizes inside its local Application Support folder. Clipboard contents never leave this Mac."
               )
             )
             .font(.caption)
@@ -735,7 +735,7 @@ struct SettingsView: View {
 
           Section(t("settings.startup", "Startup")) {
             Toggle(
-              t("settings.launch_at_login", "Launch ClipNest at login"),
+              t("settings.launch_at_login", "Launch Clipskein at login"),
               isOn: Binding(
                 get: { launchAtLogin.isRequested },
                 set: { launchAtLogin.setEnabled($0) }
@@ -916,7 +916,7 @@ struct SettingsView: View {
             Text(
               t(
                 "privacy_rule.detail",
-                "Rules are checked before copied text is written to history. Rules are encrypted with the rest of ClipNest’s local data."
+                "Rules are checked before copied text is written to history. Rules are encrypted with the rest of Clipskein’s local data."
               )
             )
             .font(.caption)
@@ -1221,13 +1221,12 @@ struct SettingsView: View {
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
           HStack(alignment: .center, spacing: 16) {
-            Image(nsImage: NSApp.applicationIconImage)
-              .resizable()
+            ClipskeinMark()
               .frame(width: 68, height: 68)
               .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
-              Text("ClipNest")
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+              Text("Clipskein")
+                .font(.system(size: 24, weight: .semibold, design: .rounded))
               Text(
                 L10n.format(
                   "settings.about.version",
@@ -1238,7 +1237,7 @@ struct SettingsView: View {
               )
               .font(.system(size: 12, weight: .medium))
               .foregroundStyle(.secondary)
-              Text(t("settings.about.tagline", "Private memory for your Mac"))
+              Text(t("settings.about.tagline", "Find. Arrange. Reuse."))
                 .font(.system(size: 13, weight: .semibold))
             }
           }
@@ -1260,7 +1259,7 @@ struct SettingsView: View {
                 "settings.about.no_tracking.detail",
                 "No telemetry, analytics, or cloud clipboard."
               ),
-              color: .blue
+              color: BrandTheme.action
             )
           }
 
@@ -1282,7 +1281,7 @@ struct SettingsView: View {
                 Spacer()
                 Image(systemName: "stethoscope")
                   .font(.system(size: 22, weight: .semibold))
-                  .foregroundStyle(.blue)
+                  .foregroundStyle(BrandTheme.action)
               }
 
               Divider()
@@ -1345,7 +1344,7 @@ struct SettingsView: View {
           Text(
             t(
               "settings.about.copyright",
-              "© 2026 ClipNest. Built for private, focused work."
+              "© 2026 Clipskein. Built for private, focused work."
             )
           )
           .font(.caption)
@@ -1357,6 +1356,7 @@ struct SettingsView: View {
       .tabItem { Label(t("settings.tab.about", "About"), systemImage: "info.circle") }
     }
     .frame(width: 640, height: 620)
+    .tint(BrandTheme.action)
     .confirmationDialog(
       L10n.format(
         "settings.import_existing_screenshots.confirm_title",
@@ -1384,7 +1384,7 @@ struct SettingsView: View {
       Text(
         t(
           "settings.import_existing_screenshots.confirm_detail",
-          "Only likely screenshots in the folder configured by macOS are considered. Files stay in place; ClipNest imports encrypted copies and runs OCR locally."
+          "Only likely screenshots in the folder configured by macOS are considered. Files stay in place; Clipskein imports encrypted copies and runs OCR locally."
         )
       )
     }
@@ -1407,7 +1407,7 @@ struct SettingsView: View {
         HStack(alignment: .top, spacing: 14) {
           Image(systemName: "link.badge.plus")
             .font(.system(size: 28, weight: .semibold))
-            .foregroundStyle(.blue)
+            .foregroundStyle(BrandTheme.action)
             .frame(width: 36)
             .accessibilityHidden(true)
           VStack(alignment: .leading, spacing: 4) {
@@ -1416,7 +1416,7 @@ struct SettingsView: View {
             Text(
               t(
                 "settings.automation.detail",
-                "Open ClipNest from Shortcuts, Raycast, browsers, or scripts. These links only navigate; they never reveal history, paste, delete, export, or change privacy settings."
+                "Open Clipskein from Shortcuts, Raycast, browsers, or scripts. These links only navigate; they never reveal history, paste, delete, export, or change privacy settings."
               )
             )
             .font(.callout)
@@ -1457,7 +1457,7 @@ struct SettingsView: View {
                   .accessibilityHint(
                     t(
                       "settings.automation.copy_hint",
-                      "Copies this ClipNest link without adding it to clipboard history"
+                      "Copies this Clipskein link without adding it to clipboard history"
                     )
                   )
                 }
@@ -1479,7 +1479,7 @@ struct SettingsView: View {
             Text(
               t(
                 "settings.automation.custom_detail",
-                "ClipNest safely encodes spaces, Chinese text, and special characters for you."
+                "Clipskein safely encodes spaces, Chinese text, and special characters for you."
               )
             )
             .font(.caption)
@@ -1585,7 +1585,7 @@ struct SettingsView: View {
             Text(
               t(
                 "settings.automation.privacy",
-                "Copied examples are marked as app-generated and are not added to ClipNest history."
+                "Copied examples are marked as app-generated and are not added to Clipskein history."
               )
             )
             .font(.caption)
@@ -1889,7 +1889,7 @@ struct SettingsView: View {
     case .on: t("settings.login.on", "On")
     case .requiresApproval: t("settings.login.approval", "Approval required")
     case .unavailable:
-      t("settings.login.unavailable", "Available after installing ClipNest.app")
+      t("settings.login.unavailable", "Available after installing Clipskein.app")
     }
   }
 

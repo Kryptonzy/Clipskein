@@ -173,10 +173,11 @@ final class ClipDragSourceNSView: NSView, NSDraggingSource {
       NSColor.controlAccentColor.withAlphaComponent(0.10).setFill()
       NSBezierPath(roundedRect: bounds, xRadius: 6, yRadius: 6).fill()
     }
+    let color = availability.isEnabled ? NSColor.secondaryLabelColor : NSColor.tertiaryLabelColor
     let configuration = NSImage.SymbolConfiguration(pointSize: 12, weight: .semibold)
+      .applying(NSImage.SymbolConfiguration(paletteColors: [color]))
     let image = NSImage(systemSymbolName: availability.systemImage, accessibilityDescription: nil)?
       .withSymbolConfiguration(configuration)
-    image?.isTemplate = true
     let imageSize = image?.size ?? NSSize(width: 12, height: 12)
     let imageRect = NSRect(
       x: bounds.midX - imageSize.width / 2,
@@ -184,7 +185,6 @@ final class ClipDragSourceNSView: NSView, NSDraggingSource {
       width: imageSize.width,
       height: imageSize.height
     )
-    (availability.isEnabled ? NSColor.secondaryLabelColor : NSColor.tertiaryLabelColor).set()
     image?.draw(in: imageRect)
   }
 

@@ -139,7 +139,7 @@ struct TemplateFillView: View {
     if !onSubmit(renderedText) {
       failureMessage = L10n.text(
         "template_fill.copy_failed",
-        fallback: "ClipNest could not copy the filled template. Your entries are still here."
+        fallback: "Clipskein could not copy the filled template. Your entries are still here."
       )
     }
   }

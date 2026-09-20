@@ -2,25 +2,28 @@
 set -euo pipefail
 
 SCRIPT_DIR=${0:A:h}
-APP_NAME=ClipNest
+APP_NAME=Clipskein
 APP_DIR="$SCRIPT_DIR/dist/$APP_NAME.app"
 RELEASE_DIR="$SCRIPT_DIR/dist/release"
 
 : ${CODESIGN_IDENTITY:?Set CODESIGN_IDENTITY to a Developer ID Application certificate.}
 : ${NOTARYTOOL_PROFILE:?Set NOTARYTOOL_PROFILE to a notarytool keychain profile.}
-: ${CLIPNEST_VERSION:?Set CLIPNEST_VERSION, for example 1.0.0.}
-: ${CLIPNEST_BUILD_NUMBER:?Set CLIPNEST_BUILD_NUMBER to a positive integer.}
+# Prefer the new names while retaining existing release automation inputs.
+MARKETING_VERSION=${CLIPSKEIN_VERSION:-${CLIPNEST_VERSION:-}}
+BUILD_NUMBER=${CLIPSKEIN_BUILD_NUMBER:-${CLIPNEST_BUILD_NUMBER:-}}
+: ${MARKETING_VERSION:?Set CLIPSKEIN_VERSION (or legacy CLIPNEST_VERSION), for example 1.0.0.}
+: ${BUILD_NUMBER:?Set CLIPSKEIN_BUILD_NUMBER (or legacy CLIPNEST_BUILD_NUMBER) to a positive integer.}
 
 if [[ "$CODESIGN_IDENTITY" != Developer\ ID\ Application:* ]]; then
   print -u2 "release-app.sh requires the full name of a Developer ID Application certificate; ad-hoc and Apple Development signing are not distribution identities."
   exit 2
 fi
-if [[ ! "$CLIPNEST_VERSION" =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]]; then
-  print -u2 "CLIPNEST_VERSION must contain three numeric components, for example 1.0.0. Use release titles for beta labels."
+if [[ ! "$MARKETING_VERSION" =~ '^[0-9]+\.[0-9]+\.[0-9]+$' ]]; then
+  print -u2 "CLIPSKEIN_VERSION (or legacy CLIPNEST_VERSION) must contain three numeric components, for example 1.0.0. Use release titles for beta labels."
   exit 2
 fi
-if [[ ! "$CLIPNEST_BUILD_NUMBER" =~ '^[1-9][0-9]*$' ]]; then
-  print -u2 "CLIPNEST_BUILD_NUMBER must be a positive integer."
+if [[ ! "$BUILD_NUMBER" =~ '^[1-9][0-9]*$' ]]; then
+  print -u2 "CLIPSKEIN_BUILD_NUMBER (or legacy CLIPNEST_BUILD_NUMBER) must be a positive integer."
   exit 2
 fi
 
@@ -36,12 +39,13 @@ if ! security find-identity -v -p codesigning | rg -F -- "\"$CODESIGN_IDENTITY\"
   exit 2
 fi
 
-export CODESIGN_IDENTITY NOTARYTOOL_PROFILE CLIPNEST_VERSION CLIPNEST_BUILD_NUMBER
+export CODESIGN_IDENTITY NOTARYTOOL_PROFILE
+export CLIPSKEIN_VERSION="$MARKETING_VERSION" CLIPSKEIN_BUILD_NUMBER="$BUILD_NUMBER"
 zsh "$SCRIPT_DIR/build-app.sh"
 
 mkdir -p "$RELEASE_DIR"
-UPLOAD_ZIP="$RELEASE_DIR/$APP_NAME-$CLIPNEST_VERSION-notarization.zip"
-FINAL_ZIP="$RELEASE_DIR/$APP_NAME-$CLIPNEST_VERSION.zip"
+UPLOAD_ZIP="$RELEASE_DIR/$APP_NAME-$MARKETING_VERSION-notarization.zip"
+FINAL_ZIP="$RELEASE_DIR/$APP_NAME-$MARKETING_VERSION.zip"
 CHECKSUM_FILE="$FINAL_ZIP.sha256"
 rm -f "$UPLOAD_ZIP" "$FINAL_ZIP" "$CHECKSUM_FILE"
 

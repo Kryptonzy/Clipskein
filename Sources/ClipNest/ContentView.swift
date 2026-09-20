@@ -33,10 +33,10 @@ struct ContentView: View {
   @FocusState private var searchIsFocused: Bool
   @FocusState private var historyIsFocused: Bool
 
-  private let ink = Color(red: 0.09, green: 0.12, blue: 0.16)
-  private let mist = Color(red: 0.94, green: 0.96, blue: 0.97)
-  private let cobalt = Color(red: 0.18, green: 0.35, blue: 0.78)
-  private let apricot = Color(red: 0.98, green: 0.61, blue: 0.36)
+  private let textColor = BrandTheme.text
+  private let canvas = BrandTheme.canvas
+  private let actionColor = BrandTheme.action
+  private let emphasisColor = BrandTheme.action
 
   init(store: ClipStore) {
     self.store = store
@@ -60,8 +60,9 @@ struct ContentView: View {
       timeline
       detail
     }
-    .background(mist)
-    .foregroundStyle(ink)
+    .background(canvas)
+    .foregroundStyle(textColor)
+    .tint(actionColor)
     .onAppear {
       store.normalizeSelection()
       if let selectedItem { store.refreshFileReferenceAvailability(for: selectedItem) }
@@ -277,15 +278,15 @@ struct ContentView: View {
   private var rail: some View {
     VStack(alignment: .leading, spacing: 22) {
       VStack(alignment: .leading, spacing: 4) {
-        Image(systemName: "square.on.square.intersection.dashed")
-          .font(.system(size: 25, weight: .semibold))
-          .foregroundStyle(apricot)
-        Text("CLIPNEST")
-          .font(.system(size: 17, weight: .black, design: .rounded))
-          .tracking(1.3)
-        Text(L10n.text("main.tagline", fallback: "Local memory for your Mac"))
+        ClipskeinMark()
+          .frame(width: 36, height: 36)
+          .accessibilityHidden(true)
+        Text("Clipskein")
+          .font(.system(size: 18, weight: .semibold, design: .rounded))
+          .tracking(0.1)
+        Text(L10n.text("main.tagline", fallback: "Find. Arrange. Reuse."))
           .font(.system(size: 11, weight: .medium))
-          .foregroundStyle(.secondary)
+          .foregroundStyle(Color.white.opacity(0.68))
       }
 
       Button {
@@ -300,9 +301,11 @@ struct ContentView: View {
         )
         .frame(maxWidth: .infinity, alignment: .leading)
       }
-      .buttonStyle(.borderedProminent)
-      .tint(apricot)
-      .foregroundStyle(ink)
+      .buttonStyle(.plain)
+      .padding(.horizontal, 10)
+      .padding(.vertical, 7)
+      .background(BrandTheme.accentOnDark, in: RoundedRectangle(cornerRadius: 7))
+      .foregroundStyle(BrandTheme.deepPlum)
       .help(
         store.hasPendingNewSnippetDraft
           ? L10n.text(
@@ -442,7 +445,7 @@ struct ContentView: View {
       .buttonStyle(.plain)
       .disabled(store.imageImportProgress?.isCancelling == true)
 
-      ScreenshotImportStatusView(store: store, accentColor: apricot)
+      ScreenshotImportStatusView(store: store, accentColor: BrandTheme.accentOnDark)
 
       Button {
         store.setScreenshotWatching(!store.preferences.watchScreenshots)
@@ -479,7 +482,7 @@ struct ContentView: View {
           systemImage: "text.viewfinder"
         )
         .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(apricot)
+        .foregroundStyle(BrandTheme.accentOnDark)
         .accessibilityAddTraits(.updatesFrequently)
       }
 
@@ -538,7 +541,7 @@ struct ContentView: View {
       }
       .buttonStyle(.plain)
       .font(.system(size: 12, weight: .medium))
-      .foregroundStyle(store.isIgnoringNextCopy ? apricot : Color.white)
+      .foregroundStyle(store.isIgnoringNextCopy ? BrandTheme.accentOnDark : Color.white)
 
       if let notice = store.notice {
         VStack(alignment: .leading, spacing: 6) {
@@ -553,7 +556,7 @@ struct ContentView: View {
           }
         }
         .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(apricot)
+        .foregroundStyle(BrandTheme.accentOnDark)
       }
 
       if let expiration = store.secureCopyExpiration {
@@ -572,7 +575,7 @@ struct ContentView: View {
           .underline()
         }
         .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(apricot)
+        .foregroundStyle(BrandTheme.accentOnDark)
       }
 
       SettingsLink {
@@ -629,11 +632,11 @@ struct ContentView: View {
         )
       }
       .font(.system(size: 10, weight: .semibold, design: .monospaced))
-      .foregroundStyle(.secondary)
+      .foregroundStyle(Color.white.opacity(0.68))
     }
     .padding(24)
     .frame(width: 210)
-    .background(ink)
+    .background(BrandTheme.railBackground)
     .foregroundStyle(Color.white)
     .confirmationDialog(
       L10n.text("main.clear_history.confirm_title", fallback: "Clear unpinned history?"),
@@ -708,8 +711,8 @@ struct ContentView: View {
           .padding(.leading, 14)
           .padding(.trailing, trimmedSearchText.isEmpty ? 14 : 34)
           .frame(height: 42)
-          .background(Color.white.opacity(0.78), in: RoundedRectangle(cornerRadius: 11))
-          .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.black.opacity(0.07)))
+          .background(BrandTheme.surface.opacity(0.78), in: RoundedRectangle(cornerRadius: 11))
+          .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.primary.opacity(0.07)))
           .overlay(alignment: .trailing) {
             if !trimmedSearchText.isEmpty {
               Button {
@@ -819,10 +822,10 @@ struct ContentView: View {
                 .font(.system(size: 9, weight: .bold, design: .monospaced))
             }
           }
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
           .padding(.horizontal, 10)
           .padding(.vertical, 8)
-          .background(cobalt.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+          .background(actionColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
           .accessibilityElement(children: .contain)
         } else if let regexMessage = store.currentRegexSearchStatus.localizedMessage {
           HStack(alignment: .firstTextBaseline, spacing: 7) {
@@ -837,18 +840,18 @@ struct ContentView: View {
             Text("regex:")
               .font(.system(size: 9, weight: .bold, design: .monospaced))
           }
-          .foregroundStyle(store.currentRegexSearchStatus.isInvalid ? Color.orange : cobalt)
+          .foregroundStyle(store.currentRegexSearchStatus.isInvalid ? Color.orange : actionColor)
           .padding(.horizontal, 10)
           .padding(.vertical, 8)
           .background(
-            (store.currentRegexSearchStatus.isInvalid ? Color.orange : cobalt).opacity(0.07),
+            (store.currentRegexSearchStatus.isInvalid ? Color.orange : actionColor).opacity(0.07),
             in: RoundedRectangle(cornerRadius: 9)
           )
           .accessibilityElement(children: .combine)
         } else if let interpretation = store.currentSearchInterpretation {
           HStack(alignment: .firstTextBaseline, spacing: 7) {
             Image(systemName: store.searchAsLiteral ? "textformat" : "sparkle.magnifyingglass")
-              .foregroundStyle(store.searchAsLiteral ? Color.secondary : cobalt)
+              .foregroundStyle(store.searchAsLiteral ? Color.secondary : actionColor)
             Text(
               store.searchAsLiteral
                 ? L10n.text(
@@ -875,11 +878,11 @@ struct ContentView: View {
             }
             .buttonStyle(.plain)
             .font(.system(size: 10, weight: .bold))
-            .foregroundStyle(cobalt)
+            .foregroundStyle(actionColor)
           }
           .padding(.horizontal, 10)
           .padding(.vertical, 8)
-          .background(cobalt.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+          .background(actionColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
           .accessibilityElement(children: .contain)
         }
 
@@ -896,7 +899,7 @@ struct ContentView: View {
                     .frame(height: 25)
                     .background(
                       store.selectedTag?.localizedCaseInsensitiveCompare(tag) == .orderedSame
-                        ? cobalt.opacity(0.16) : Color.white.opacity(0.68),
+                        ? actionColor.opacity(0.16) : BrandTheme.surface.opacity(0.68),
                       in: Capsule()
                     )
                 }
@@ -946,7 +949,7 @@ struct ContentView: View {
       keyboardCommandButtons
     }
     .frame(width: 360)
-    .background(Color.white.opacity(0.46))
+    .background(BrandTheme.surface.opacity(0.46))
   }
 
   private func clipRow(_ item: ClipItem) -> some View {
@@ -969,7 +972,7 @@ struct ContentView: View {
             if item.isPinned {
               Image(systemName: "pin.fill")
                 .font(.system(size: 10))
-                .foregroundStyle(apricot)
+                .foregroundStyle(emphasisColor)
             }
           }
           HStack(spacing: 6) {
@@ -1002,7 +1005,7 @@ struct ContentView: View {
                 semanticConfidence.localizedLabel,
                 systemImage: semanticConfidence.systemImage
               )
-              .foregroundStyle(cobalt)
+              .foregroundStyle(actionColor)
             }
             if let expiresAt = item.expiresAt {
               Text("·")
@@ -1025,8 +1028,8 @@ struct ContentView: View {
                   .lineLimit(1)
                   .padding(.horizontal, 6)
                   .frame(height: 18)
-                  .foregroundStyle(cobalt)
-                  .background(apricot.opacity(0.17), in: Capsule())
+                  .foregroundStyle(actionColor)
+                  .background(emphasisColor.opacity(0.17), in: Capsule())
               }
               ForEach(item.tags.prefix(2), id: \.self) { tag in
                 Text("#\(tag)")
@@ -1034,7 +1037,7 @@ struct ContentView: View {
                   .lineLimit(1)
                   .padding(.horizontal, 6)
                   .frame(height: 18)
-                  .background(cobalt.opacity(0.09), in: Capsule())
+                  .background(actionColor.opacity(0.09), in: Capsule())
               }
               if item.tags.count > 2 {
                 Text("+\(item.tags.count - 2)")
@@ -1048,10 +1051,10 @@ struct ContentView: View {
       }
       .padding(.horizontal, 18)
       .padding(.vertical, 13)
-      .background(store.selectedID == item.id ? cobalt.opacity(0.09) : Color.clear)
+      .background(store.selectedID == item.id ? actionColor.opacity(0.09) : Color.clear)
       .overlay(alignment: .leading) {
         if store.selectedID == item.id {
-          Rectangle().fill(cobalt).frame(width: 3)
+          Rectangle().fill(actionColor).frame(width: 3)
         }
       }
     }
@@ -1162,7 +1165,7 @@ struct ContentView: View {
     } else if item.kind == .files {
       Image(systemName: item.filePaths.count > 1 ? "doc.on.doc.fill" : "doc.fill")
         .font(.system(size: 34, weight: .medium))
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
         .frame(width: 42, height: 42)
     } else {
       contentGlyph(item, size: 52)
@@ -1179,7 +1182,7 @@ struct ContentView: View {
         .background(Color.white, in: RoundedRectangle(cornerRadius: size * 0.22))
         .overlay(
           RoundedRectangle(cornerRadius: size * 0.22)
-            .stroke(Color.black.opacity(0.14), lineWidth: 0.5)
+            .stroke(Color.primary.opacity(0.14), lineWidth: 0.5)
         )
         .shadow(color: Color.black.opacity(0.14), radius: 1, y: 1)
         .accessibilityHidden(true)
@@ -1202,7 +1205,7 @@ struct ContentView: View {
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(mist)
+    .background(canvas)
   }
 
   private func detailView(_ item: ClipItem) -> some View {
@@ -1223,7 +1226,7 @@ struct ContentView: View {
           )
           .font(.system(size: 10, weight: .black, design: .monospaced))
           .tracking(1.1)
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
           if item.customTitle != nil {
             Text(item.localizedDisplayTitle())
               .font(.system(size: 17, weight: .bold, design: .rounded))
@@ -1262,7 +1265,7 @@ struct ContentView: View {
           if let alias = item.alias {
             Text("@\(alias)")
               .font(.system(size: 10, weight: .bold, design: .monospaced))
-              .foregroundStyle(cobalt)
+              .foregroundStyle(actionColor)
           }
           if item.hasRichText, !item.isConcealed {
             Label(
@@ -1316,7 +1319,7 @@ struct ContentView: View {
                       .font(.system(size: 11, weight: .semibold))
                       .padding(.horizontal, 10)
                       .frame(height: 28)
-                      .background(apricot.opacity(0.14), in: Capsule())
+                      .background(emphasisColor.opacity(0.14), in: Capsule())
                   }
                   .buttonStyle(.plain)
                   .help(
@@ -1343,7 +1346,7 @@ struct ContentView: View {
                       .font(.system(size: 11, weight: .semibold))
                       .padding(.horizontal, 10)
                       .frame(height: 28)
-                      .background(cobalt.opacity(0.10), in: Capsule())
+                      .background(actionColor.opacity(0.10), in: Capsule())
                   }
                   .buttonStyle(.plain)
                   .help(tagFilterActionLabel(tag))
@@ -1380,7 +1383,7 @@ struct ContentView: View {
               .frame(height: 120)
               .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                  .stroke(Color.black.opacity(0.10), lineWidth: 1)
+                  .stroke(Color.primary.opacity(0.10), lineWidth: 1)
               )
           }
 
@@ -1390,7 +1393,7 @@ struct ContentView: View {
                 Label(
                   L10n.text(
                     "main.detail.visible_until_blur",
-                    fallback: "Visible until ClipNest loses focus"
+                    fallback: "Visible until Clipskein loses focus"
                   ),
                   systemImage: "eye.fill"
                 )
@@ -1423,7 +1426,7 @@ struct ContentView: View {
             HStack(spacing: 10) {
               Image(systemName: "text.badge.plus")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(cobalt)
+                .foregroundStyle(actionColor)
               VStack(alignment: .leading, spacing: 3) {
                 Text(L10n.text("main.detail.dynamic_template", fallback: "DYNAMIC TEMPLATE"))
                   .font(.system(size: 10, weight: .black, design: .monospaced))
@@ -1463,8 +1466,8 @@ struct ContentView: View {
               }
             }
             .padding(12)
-            .background(cobalt.opacity(0.07), in: RoundedRectangle(cornerRadius: 11))
-            .overlay(RoundedRectangle(cornerRadius: 11).stroke(cobalt.opacity(0.15)))
+            .background(actionColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 11))
+            .overlay(RoundedRectangle(cornerRadius: 11).stroke(actionColor.opacity(0.15)))
           }
 
           let tableActions = tableActions(for: item)
@@ -1507,9 +1510,9 @@ struct ContentView: View {
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .padding(.horizontal, 11)
                     .frame(height: 40)
-                    .background(Color.white.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
+                    .background(BrandTheme.surface.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
                     .overlay(
-                      RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07))
+                      RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07))
                     )
                   }
                   .buttonStyle(.plain)
@@ -1560,9 +1563,9 @@ struct ContentView: View {
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .padding(.horizontal, 11)
                     .frame(height: 40)
-                    .background(Color.white.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
+                    .background(BrandTheme.surface.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
                     .overlay(
-                      RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07))
+                      RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07))
                     )
                   }
                   .buttonStyle(.plain)
@@ -1655,9 +1658,9 @@ struct ContentView: View {
                     }
                     .padding(.horizontal, 11)
                     .frame(height: 46)
-                    .background(Color.white.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
+                    .background(BrandTheme.surface.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
                     .overlay(
-                      RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07))
+                      RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07))
                     )
                   }
                   .buttonStyle(.plain)
@@ -1828,7 +1831,7 @@ struct ContentView: View {
           .frame(height: 46)
           .frame(maxWidth: .infinity)
           .foregroundStyle(.white)
-          .background(ink, in: RoundedRectangle(cornerRadius: 12))
+          .background(BrandTheme.plum, in: RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
         .keyboardShortcut(.return, modifiers: [])
@@ -1841,7 +1844,7 @@ struct ContentView: View {
   private var contextNavigationBanner: some View {
     HStack(spacing: 9) {
       Image(systemName: "arrow.triangle.branch")
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
       Text(
         L10n.text(
           "main.context.outside_results",
@@ -1856,11 +1859,11 @@ struct ContentView: View {
       }
       .buttonStyle(.borderless)
       .font(.system(size: 11, weight: .bold))
-      .foregroundStyle(cobalt)
+      .foregroundStyle(actionColor)
     }
     .padding(.horizontal, 24)
     .frame(minHeight: 38)
-    .background(cobalt.opacity(0.055))
+    .background(actionColor.opacity(0.055))
   }
 
   @ViewBuilder
@@ -1894,7 +1897,7 @@ struct ContentView: View {
                     ? "arrow.up.left" : "arrow.down.right"
                 )
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(cobalt)
+                .foregroundStyle(actionColor)
                 .frame(width: 18)
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -1923,8 +1926,8 @@ struct ContentView: View {
               }
               .padding(.horizontal, 11)
               .frame(minHeight: 46)
-              .background(Color.white.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
-              .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07)))
+              .background(BrandTheme.surface.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
+              .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07)))
               .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -2255,7 +2258,7 @@ struct ContentView: View {
       }
       .buttonStyle(.plain)
       .font(.system(size: 10, weight: .bold))
-      .foregroundStyle(cobalt)
+      .foregroundStyle(actionColor)
     }
     .padding(12)
     .background(Color.orange.opacity(0.10), in: RoundedRectangle(cornerRadius: 11))
@@ -2434,7 +2437,7 @@ struct ContentView: View {
     } label: {
       Image(systemName: "rectangle.stack.badge.plus")
         .font(.system(size: 11, weight: .bold))
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
     }
     .menuStyle(.borderlessButton)
     .menuIndicator(.hidden)
@@ -2512,8 +2515,8 @@ struct ContentView: View {
       Image(systemName: "line.3.horizontal.decrease")
         .font(.system(size: 14, weight: .bold))
         .frame(width: 42, height: 42)
-        .background(Color.white.opacity(0.78), in: RoundedRectangle(cornerRadius: 11))
-        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.black.opacity(0.07)))
+        .background(BrandTheme.surface.opacity(0.78), in: RoundedRectangle(cornerRadius: 11))
+        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.primary.opacity(0.07)))
     }
     .menuStyle(.borderlessButton)
     .menuIndicator(.hidden)
@@ -2556,8 +2559,8 @@ struct ContentView: View {
       Image(systemName: store.activeSavedViewID == nil ? "bookmark" : "bookmark.fill")
         .font(.system(size: 14, weight: .bold))
         .frame(width: 42, height: 42)
-        .background(Color.white.opacity(0.78), in: RoundedRectangle(cornerRadius: 11))
-        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.black.opacity(0.07)))
+        .background(BrandTheme.surface.opacity(0.78), in: RoundedRectangle(cornerRadius: 11))
+        .overlay(RoundedRectangle(cornerRadius: 11).stroke(Color.primary.opacity(0.07)))
     }
     .menuStyle(.borderlessButton)
     .menuIndicator(.hidden)
@@ -2609,7 +2612,7 @@ struct ContentView: View {
           systemImage: "square.stack.3d.up.fill"
         )
         .font(.system(size: 11, weight: .bold, design: .rounded))
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
         if let nextItem = store.stackItems.first {
           Text(
             L10n.format(
@@ -2644,6 +2647,7 @@ struct ContentView: View {
             L10n.text("main.stack.compare", fallback: "Compare"),
             systemImage: "arrow.left.arrow.right"
           )
+          .labelStyle(.iconOnly)
         }
         .buttonStyle(.plain)
         .font(.system(size: 11, weight: .bold))
@@ -2711,8 +2715,8 @@ struct ContentView: View {
     }
     .padding(.horizontal, 11)
     .frame(height: 46)
-    .background(cobalt.opacity(0.08), in: RoundedRectangle(cornerRadius: 9))
-    .overlay(RoundedRectangle(cornerRadius: 9).stroke(cobalt.opacity(0.16)))
+    .background(actionColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 9))
+    .overlay(RoundedRectangle(cornerRadius: 9).stroke(actionColor.opacity(0.16)))
     .confirmationDialog(
       L10n.format(
         "main.stack.clear_confirm_title", fallback: "Remove all %d Stack items?",
@@ -2940,7 +2944,7 @@ struct ContentView: View {
     if !store.isMonitoring {
       return L10n.text(
         "main.empty.monitoring_detail",
-        fallback: "Resume monitoring when you want ClipNest to remember new copies."
+        fallback: "Resume monitoring when you want Clipskein to remember new copies."
       )
     }
     return L10n.text(
@@ -3004,16 +3008,16 @@ struct ContentView: View {
         .fill(
           analysis.color.map {
             Color(red: $0.red, green: $0.green, blue: $0.blue, opacity: $0.alpha)
-          } ?? cobalt.opacity(0.10)
+          } ?? actionColor.opacity(0.10)
         )
       if analysis.color == nil {
         Image(systemName: analysis.kind.systemImage)
           .font(.system(size: size * 0.30, weight: .bold))
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
       }
     }
     .frame(width: size, height: size)
-    .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color.black.opacity(0.08)))
+    .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color.primary.opacity(0.08)))
   }
 
   private func concealedGlyph(size: CGFloat) -> some View {
@@ -3056,7 +3060,7 @@ struct ContentView: View {
           if store.preferences.authenticateConcealedPreviews {
             canReveal = await concealedAccess.authorize(
               reason: L10n.text(
-                "main.detail.reveal_reason", fallback: "Reveal a concealed ClipNest preview")
+                "main.detail.reveal_reason", fallback: "Reveal a concealed Clipskein preview")
             )
           } else {
             canReveal = true
@@ -3154,7 +3158,7 @@ struct ContentView: View {
         HStack(spacing: 10) {
           Image(systemName: status == .missing ? "doc.badge.ellipsis" : "doc.fill")
             .font(.system(size: 23, weight: .regular))
-            .foregroundStyle(status == .missing ? Color.orange : cobalt)
+            .foregroundStyle(status == .missing ? Color.orange : actionColor)
             .frame(width: 30, height: 30)
             .opacity(status == .checking ? 0.5 : 1)
           VStack(alignment: .leading, spacing: 2) {
@@ -3215,8 +3219,8 @@ struct ContentView: View {
           }
         }
         .padding(10)
-        .background(Color.white.opacity(0.65), in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.06)))
+        .background(BrandTheme.surface.opacity(0.65), in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.06)))
       }
     }
   }
@@ -3227,7 +3231,7 @@ struct ContentView: View {
     panel.message = L10n.format(
       "file_relink.message",
       fallback:
-        "Choose the new location for %@. ClipNest will keep the rest of this group unchanged.",
+        "Choose the new location for %@. Clipskein will keep the rest of this group unchanged.",
       URL(fileURLWithPath: path).lastPathComponent
     )
     panel.prompt = L10n.text("file_relink.choose", fallback: "Use This Location")
@@ -3263,7 +3267,7 @@ struct ContentView: View {
     }
     return L10n.text(
       "main.detail.preview_concealed_detail",
-      fallback: "ClipNest detected potentially sensitive text or you concealed this clip manually."
+      fallback: "Clipskein detected potentially sensitive text or you concealed this clip manually."
     )
   }
 
@@ -3326,7 +3330,7 @@ struct ContentView: View {
           .foregroundStyle(.secondary)
           .padding(12)
           .frame(maxWidth: .infinity, alignment: .leading)
-          .background(Color.white.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
+          .background(BrandTheme.surface.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
         } else {
           localIntelligenceActions(for: item, input: input)
           localIntelligenceState(for: item)
@@ -3336,7 +3340,7 @@ struct ContentView: View {
         HStack(alignment: .top, spacing: 10) {
           Image(systemName: "apple.intelligence")
             .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(cobalt)
+            .foregroundStyle(actionColor)
           VStack(alignment: .leading, spacing: 3) {
             Text(title)
               .font(.system(size: 12, weight: .bold))
@@ -3347,7 +3351,7 @@ struct ContentView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
+        .background(BrandTheme.surface.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
       }
     }
   }
@@ -3400,10 +3404,10 @@ struct ContentView: View {
           localIntelligence.cancel()
         }
         .buttonStyle(.plain)
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
       }
       .padding(12)
-      .background(cobalt.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+      .background(actionColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
 
     case .result(let action, let result):
       VStack(alignment: .leading, spacing: 10) {
@@ -3440,7 +3444,7 @@ struct ContentView: View {
             store.addText(
               result,
               source: L10n.text(
-                "generated.source.intelligence", fallback: "ClipNest Local Intelligence"),
+                "generated.source.intelligence", fallback: "Clipskein Local Intelligence"),
               isConcealed: item.isConcealed,
               customTitle: L10n.format(
                 "generated.title.intelligence", fallback: "%@ result", action.label),
@@ -3458,8 +3462,8 @@ struct ContentView: View {
         .buttonStyle(.bordered)
       }
       .padding(12)
-      .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 10))
-      .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07)))
+      .background(BrandTheme.surface.opacity(0.72), in: RoundedRectangle(cornerRadius: 10))
+      .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07)))
 
     case .failed(let message):
       HStack(alignment: .top, spacing: 9) {
@@ -3472,7 +3476,7 @@ struct ContentView: View {
           localIntelligence.reset()
         }
         .buttonStyle(.plain)
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
       }
       .padding(12)
       .background(Color.orange.opacity(0.09), in: RoundedRectangle(cornerRadius: 10))
@@ -3523,7 +3527,7 @@ struct ContentView: View {
         .foregroundStyle(.secondary)
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
+        .background(BrandTheme.surface.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
       } else if input.count > LocalTranslationController.maximumInputLength {
         Label(
           L10n.text(
@@ -3536,7 +3540,7 @@ struct ContentView: View {
         .foregroundStyle(.secondary)
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
+        .background(BrandTheme.surface.opacity(0.58), in: RoundedRectangle(cornerRadius: 10))
       } else {
         HStack(spacing: 10) {
           Text(L10n.text("main.detail.translate_to", fallback: "Translate to"))
@@ -3652,7 +3656,7 @@ struct ContentView: View {
             store.addText(
               result,
               source: L10n.text(
-                "generated.source.translation", fallback: "ClipNest Local Translation"),
+                "generated.source.translation", fallback: "Clipskein Local Translation"),
               isConcealed: item.isConcealed,
               customTitle: L10n.format(
                 "generated.title.translation", fallback: "Translated to %@", target.displayName),
@@ -3670,8 +3674,8 @@ struct ContentView: View {
         .buttonStyle(.bordered)
       }
       .padding(12)
-      .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 10))
-      .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07)))
+      .background(BrandTheme.surface.opacity(0.72), in: RoundedRectangle(cornerRadius: 10))
+      .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07)))
 
     case .failed(let message):
       HStack(alignment: .top, spacing: 9) {
@@ -3684,14 +3688,14 @@ struct ContentView: View {
             localTranslation.request(text: input, target: translationTarget)
           }
           .buttonStyle(.plain)
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
         }
         Spacer()
         Button(L10n.text("main.detail.dismiss", fallback: "Dismiss")) {
           localTranslation.reset()
         }
         .buttonStyle(.plain)
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
       }
       .padding(12)
       .background(Color.orange.opacity(0.09), in: RoundedRectangle(cornerRadius: 10))
@@ -3714,10 +3718,10 @@ struct ContentView: View {
         localTranslation.cancel()
       }
       .buttonStyle(.plain)
-      .foregroundStyle(cobalt)
+      .foregroundStyle(actionColor)
     }
     .padding(12)
-    .background(cobalt.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+    .background(actionColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
   }
 
   private var isLocalTranslationActive: Bool {
@@ -3794,7 +3798,7 @@ struct ContentView: View {
             )
           }
           .buttonStyle(.plain)
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
           .help(
             L10n.format(
               "main.detail.copy_search_match_help",
@@ -3828,8 +3832,8 @@ struct ContentView: View {
         } else {
           MarkdownPreviewView(document: markdown)
             .padding(16)
-            .background(Color.white.opacity(0.66), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.black.opacity(0.06)))
+            .background(BrandTheme.surface.opacity(0.66), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.06)))
         }
 
         HStack(spacing: 8) {
@@ -3854,7 +3858,7 @@ struct ContentView: View {
             )
           }
           .buttonStyle(.plain)
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
         }
         .font(.system(size: 10, weight: .semibold))
         .foregroundStyle(.secondary)
@@ -3914,7 +3918,7 @@ struct ContentView: View {
         HStack(spacing: 10) {
           Image(systemName: barcode.isQRCode ? "qrcode" : "barcode")
             .font(.system(size: 19, weight: .semibold))
-            .foregroundStyle(cobalt)
+            .foregroundStyle(actionColor)
             .frame(width: 24)
           VStack(alignment: .leading, spacing: 3) {
             Text(barcode.localizedKind)
@@ -3953,8 +3957,8 @@ struct ContentView: View {
           .buttonStyle(.bordered)
         }
         .padding(11)
-        .background(Color.white.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07)))
+        .background(BrandTheme.surface.opacity(0.68), in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.07)))
       }
     }
   }

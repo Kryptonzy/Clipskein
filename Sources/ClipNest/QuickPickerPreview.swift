@@ -64,9 +64,9 @@ struct QuickPickerPreviewView: View {
     self.onClose = onClose
   }
 
-  private let ink = Color(red: 0.09, green: 0.12, blue: 0.16)
-  private let mist = Color(red: 0.94, green: 0.96, blue: 0.97)
-  private let cobalt = Color(red: 0.18, green: 0.35, blue: 0.78)
+  private let textColor = BrandTheme.text
+  private let canvas = BrandTheme.canvas
+  private let actionColor = BrandTheme.action
 
   var body: some View {
     VStack(alignment: .leading, spacing: 0) {
@@ -78,7 +78,7 @@ struct QuickPickerPreviewView: View {
           HStack(spacing: 5) {
             Text(payload.sourceApplication)
             Text("·")
-            Text(payload.createdAt, style: .relative)
+            Text(payload.createdAt, style: .relative).monospacedDigit()
             if payload.isTruncated {
               Text("·")
               Label(
@@ -101,8 +101,9 @@ struct QuickPickerPreviewView: View {
       previewContent
     }
     .frame(minWidth: 620, minHeight: 480)
-    .background(mist)
-    .foregroundStyle(ink)
+    .background(canvas)
+    .foregroundStyle(textColor)
+    .tint(actionColor)
     .accessibilityElement(children: .contain)
   }
 
@@ -140,7 +141,7 @@ struct QuickPickerPreviewView: View {
             systemImage: "text.viewfinder"
           )
           .font(.system(size: 11, weight: .bold, design: .rounded))
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
 
           ScrollView {
             Text(
@@ -150,7 +151,7 @@ struct QuickPickerPreviewView: View {
                 : recognizedText
             )
             .font(.system(size: 12, design: .monospaced))
-            .foregroundStyle(recognizedText.isEmpty ? Color.secondary : ink)
+            .foregroundStyle(recognizedText.isEmpty ? Color.secondary : textColor)
             .textSelection(.enabled)
             .frame(maxWidth: .infinity, alignment: .topLeading)
           }

@@ -1,10 +1,10 @@
 # Security policy
 
-ClipNest handles clipboard history, which may contain sensitive information. Do not post real clipboard contents, archive passwords, encryption keys, or unredacted logs in a public issue.
+Clipskein handles clipboard history, which may contain sensitive information. Do not post real clipboard contents, archive passwords, encryption keys, or unredacted logs in a public issue.
 
 ## Report a vulnerability
 
-Use [GitHub's private vulnerability reporting](https://github.com/Kryptonzy/ClipNest/security/advisories/new) for suspected security problems. Include the affected commit or version, macOS version, reproducible steps using synthetic data, expected versus actual behavior, and potential impact. Keep exploit details private while a fix is being prepared.
+Use [GitHub's private vulnerability reporting](https://github.com/Kryptonzy/Clipskein/security/advisories/new) for suspected security problems. Include the affected commit or version, macOS version, reproducible steps using synthetic data, expected versus actual behavior, and potential impact. Keep exploit details private while a fix is being prepared.
 
 Security fixes currently target the latest `main` branch. There are no maintained long-term-support branches or guaranteed response times.
 

@@ -197,7 +197,7 @@ struct TextActionPickerView: View {
       if let feedback {
         Text(feedback)
           .font(.system(size: 10, weight: .semibold))
-          .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+          .foregroundStyle(BrandTheme.accentOnDark)
           .frame(maxWidth: .infinity, alignment: .leading)
           .padding(.horizontal, 18)
           .frame(height: 32)
@@ -223,9 +223,12 @@ struct TextActionPickerView: View {
       .frame(width: 0, height: 0)
     }
     .foregroundStyle(.white)
+    .tint(BrandTheme.softPlum)
+    .accentColor(BrandTheme.softPlum)
+    .environment(\.colorScheme, .dark)
     .background(
       RoundedRectangle(cornerRadius: 18)
-        .fill(Color(red: 0.075, green: 0.095, blue: 0.125))
+        .fill(BrandTheme.popoverBackground)
         .overlay(
           RoundedRectangle(cornerRadius: 18)
             .stroke(Color.white.opacity(0.12), lineWidth: 1)
@@ -309,7 +312,7 @@ struct TextActionPickerView: View {
     HStack(spacing: 12) {
       Image(systemName: "wand.and.sparkles")
         .font(.system(size: 18, weight: .semibold))
-        .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+        .foregroundStyle(BrandTheme.accentOnDark)
       VStack(alignment: .leading, spacing: 2) {
         Text(L10n.text("text_actions.title", fallback: "TEXT ACTIONS"))
           .font(.system(size: 10, weight: .black, design: .monospaced))
@@ -405,7 +408,7 @@ struct TextActionPickerView: View {
           actionQuery = ""
         }
         .buttonStyle(.plain)
-        .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+        .foregroundStyle(BrandTheme.accentOnDark)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
     } else {
@@ -415,7 +418,7 @@ struct TextActionPickerView: View {
             .frame(width: 22)
             .foregroundStyle(
               selectedActionID == action.id
-                ? Color(red: 0.98, green: 0.61, blue: 0.36) : Color.white.opacity(0.52)
+                ? BrandTheme.selectedAccent : Color.white.opacity(0.70)
             )
           VStack(alignment: .leading, spacing: 2) {
             Text(action.label)
@@ -423,7 +426,8 @@ struct TextActionPickerView: View {
             Text(action.preview)
               .font(.system(size: 10, weight: .regular, design: .monospaced))
               .foregroundStyle(
-                selectedActionID == action.id ? Color.white.opacity(0.72) : .secondary
+                selectedActionID == action.id
+                  ? BrandTheme.selectedText.opacity(0.76) : Color.white.opacity(0.70)
               )
               .lineLimit(1)
           }
@@ -434,11 +438,13 @@ struct TextActionPickerView: View {
             } else {
               Image(systemName: "return")
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(Color.white.opacity(0.5))
+                .foregroundStyle(BrandTheme.selectedText.opacity(0.76))
             }
           }
         }
         .padding(.vertical, 4)
+        .foregroundStyle(selectedActionID == action.id ? BrandTheme.selectedText : Color.white)
+        .background(selectedActionID == action.id ? BrandTheme.softPlum : Color.clear)
         .contentShape(Rectangle())
         .tag(action.id)
         .onTapGesture(count: 2) {

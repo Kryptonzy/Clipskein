@@ -10,7 +10,7 @@
     <string>zh-Hans</string>
   </array>
   <key>CFBundleDisplayName</key>
-  <string>ClipNest</string>
+  <string>Clipskein</string>
   <key>CFBundleExecutable</key>
   <string>ClipNest</string>
   <key>CFBundleIconFile</key>
@@ -20,7 +20,7 @@
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>ClipNest</string>
+  <string>Clipskein</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleURLTypes</key>
@@ -32,6 +32,7 @@
       <string>app.clipnest.ClipNest.deep-link</string>
       <key>CFBundleURLSchemes</key>
       <array>
+        <string>clipskein</string>
         <string>clipnest</string>
       </array>
     </dict>
@@ -45,7 +46,7 @@
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>NSScreenCaptureUsageDescription</key>
-  <string>ClipNest captures only the screen region you select so it can recognize and copy text locally.</string>
+  <string>Clipskein captures only the screen region you select so it can recognize and copy text locally.</string>
   <key>NSHumanReadableCopyright</key>
   <string>Copyright © 2026 Kong Zhiyang. MIT License.</string>
 </dict>

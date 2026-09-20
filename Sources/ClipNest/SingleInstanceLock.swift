@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 
-/// A process-scoped advisory lock that prevents multiple ClipNest instances from
+/// A process-scoped advisory lock that prevents multiple Clipskein/legacy ClipNest instances from
 /// registering the same global shortcuts or monitoring the same pasteboard.
 final class SingleInstanceLock {
   private static let ownershipLock = NSLock()
@@ -64,6 +64,7 @@ final class SingleInstanceLock {
       ).first
     else { return nil }
 
+    // Share the legacy lock so both app names cannot capture into one store concurrently.
     let lockURL =
       applicationSupport
       .appendingPathComponent("ClipNest", isDirectory: true)

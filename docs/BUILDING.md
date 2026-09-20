@@ -1,6 +1,6 @@
 # Building and verification
 
-Run commands from the `ClipNest` directory. Install a full Xcode with Swift 6.1 or newer and `ripgrep` (`rg`), then inspect the selected toolchain:
+Run commands from the repository root, the directory containing `Package.swift` and `build-app.sh`. Install a full Xcode with Swift 6.1 or newer and `ripgrep` (`rg`), then inspect the selected toolchain:
 
 ```bash
 xcode-select -p
@@ -15,10 +15,10 @@ If the selected toolchain is not the intended Xcode installation, select it in X
 
 ```bash
 zsh build-app.sh
-open dist/ClipNest.app
+open dist/Clipskein.app
 ```
 
-`build-app.sh` checks localization, compiles an optimized binary, generates the icon, packages resources, signs the bundle, and verifies its signature and plist. It writes `dist/ClipNest.app`. It does not run tests, notarize, publish, or prove runtime compatibility on other Macs. SwiftPM's build sandbox is disabled by this script so the selected local toolchain can build; this is distinct from the app's signing and Hardened Runtime settings.
+`build-app.sh` checks localization, compiles an optimized binary, generates the icon, packages resources, signs the bundle, and verifies its signature and plist. It writes `dist/Clipskein.app`. It does not run tests, notarize, publish, or prove runtime compatibility on other Macs. SwiftPM's build sandbox is disabled by this script so the selected local toolchain can build; this is distinct from the app's signing and Hardened Runtime settings.
 
 The default signature is ad-hoc. To preserve a stable signing identity across local upgrades:
 
@@ -26,9 +26,21 @@ The default signature is ad-hoc. To preserve a stable signing identity across lo
 CODESIGN_IDENTITY="Apple Development: Your Name (TEAMID)" zsh build-app.sh
 ```
 
-Use `security find-identity -v -p codesigning` to inspect locally available identities. Do not share private keys or Keychain passwords. The script also accepts `CLIPNEST_BUNDLE_ID`, `CLIPNEST_VERSION` (`major.minor.patch`), and `CLIPNEST_BUILD_NUMBER` (positive integer). Preserve the bundle identifier and signing identity when testing an upgrade of an existing installation.
+Use `security find-identity -v -p codesigning` to inspect locally available identities. Do not share private keys or Keychain passwords. The script also accepts `CLIPSKEIN_BUNDLE_ID`, `CLIPSKEIN_VERSION` (`major.minor.patch`), and `CLIPSKEIN_BUILD_NUMBER` (positive integer). The old `CLIPNEST_*` names remain accepted as fallbacks; the corresponding `CLIPSKEIN_*` value takes precedence when non-empty. Preserve the default bundle identifier, `app.clipnest.ClipNest`, and signing identity when testing an upgrade of an existing installation.
 
 `zsh run.sh` invokes the executable through Swift Package Manager for development. It does not create or install an app bundle, so Launch Services, permissions, icons, and app identity should be checked using the packaged app.
+
+The public app is `Clipskein.app`, but the Swift package, module, executable, `Sources/ClipNest` path, and `ClipNest_ClipNest.bundle` resource name intentionally retain their internal names. The packaged `CFBundleExecutable` is still `ClipNest`; do not rename only that file without updating the packaging contract.
+
+## Upgrade an existing ClipNest installation
+
+1. Before replacing the app, create an encrypted backup if the existing history is accessible. Keep its password separately.
+2. Quit the old app normally so pending writes finish. Also quit any running Clipskein copy.
+3. Replace the old application bundle with `Clipskein.app` in your usual installation location, rather than leaving two launchable app copies installed. This replaces the app only: do not delete `~/Library/Application Support/ClipNest`, preferences, or either application's Keychain entries.
+4. Launch Clipskein and confirm that existing history and attachments are present. The original storage directory, bundle identifier, local-encryption Keychain service/account, backup format, and single-instance lock remain unchanged. Existing `.clipnestarchive` backups remain supported.
+5. Check Settings → Launch at login and the macOS Login Items list. Verify paste-back and screen capture; revisit Accessibility and Screen Recording permissions if macOS requests approval or a feature is unavailable.
+
+Keeping the same bundle identifier does not guarantee approval-free upgrades. Ad-hoc rebuilds change code identity, and changing an app's path can also require renewed Keychain or privacy authorization. Review prompts for the trusted app you installed. Never delete the history encryption key or weaken Keychain protection to suppress a prompt. For repeated upgrade testing, use a stable signing certificate and installation location.
 
 ## Automated verification
 
@@ -40,8 +52,8 @@ swift test --skip-build --skip 'maximumHistoryMeaningIndexHasBoundedColdAndWarmL
 swift test --skip-build --filter maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
 swift test --skip-build --filter maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot
 zsh build-app.sh
-codesign --verify --deep --strict --verbose=2 dist/ClipNest.app
-plutil -lint dist/ClipNest.app/Contents/Info.plist
+codesign --verify --deep --strict --verbose=2 dist/Clipskein.app
+plutil -lint dist/Clipskein.app/Contents/Info.plist
 ```
 
 Compile the application and tests first, then use `--skip-build` for all three test runs. The meaning-search benchmark and the coalesced-persistence benchmark each run alone, keeping their existing latency limits while avoiding interference from the functional suite. In CI, functional tests have a three-minute step timeout and each performance test has a two-minute timeout; compilation has its own preceding step so it does not consume those test limits.
@@ -51,6 +63,16 @@ The AppKit integration suite runs serially because its cases share process-level
 English and Simplified Chinese integration tests check Apple's optional word-embedding resources independently. If a language model is absent, its test reports an explicit skip with the language named. When the resource is present, the actual semantic results must still pass. The injected missing-model fallback test always runs and verifies that unavailable models produce an explicit unavailable result with no indexed documents or stale hits. Record both passed and skipped tests, the actual toolchain, host OS, and binary checksum for a release candidate rather than treating previously recorded counts as current evidence.
 
 The localization gate checks valid string-file syntax, duplicate keys, English/Chinese parity, and common hard-coded UI literals. It is a targeted check, not a complete translation or accessibility audit. `codesign --verify` checks signature integrity; it does not replace notarization or a Gatekeeper assessment.
+
+### Synthetic visual previews
+
+For a reproducible visual check on a Mac with a window server:
+
+```bash
+CLIPSKEIN_RENDER_BRAND_PREVIEWS=1 swift test --filter BrandPreviewTests
+```
+
+This opt-in test renders the welcome screen, library, and brand components in light and dark appearances, plus the dark Quick Picker, into `.build/brand-preview`. It uses fictional text, a temporary encrypted store, isolated preferences, and a named test pasteboard. It does not launch the app or inspect real clipboard history. The preview test is explicitly skipped during ordinary test runs. These images are layout checks, not evidence that permission prompts, cross-app paste, or other interactive workflows have been manually verified.
 
 ## Manual smoke test before distribution
 

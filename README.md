@@ -1,6 +1,12 @@
-# ClipNest
+# Clipskein
 
-A local-first macOS clipboard and screenshot library. Save copied text, images, and file references, recognize screenshot text, and retrieve it from a keyboard-driven picker.
+<img src="Packaging/AppIcon.svg" width="96" height="96" alt="Clipskein icon">
+
+Find. Arrange. Reuse.
+
+A local-first reference workbench for macOS. Find text inside your clipboard history and screenshots, arrange useful clips into Pinboards, and bring several pieces back together with Stack.
+
+Use the library when organizing a project and the keyboard-driven Quick Picker when working in another app. Text, images, file references, and reusable snippets stay in one searchable collection.
 
 ## What it does
 
@@ -9,7 +15,7 @@ A local-first macOS clipboard and screenshot library. Save copied text, images, 
 - Offers Quick Picker, typo-tolerant and structured search, snippets, tags, Pinboards, and a multi-clip Stack.
 - Extracts receipt fields and exports structured tables; provides local text cleanup and optional Apple translation and AI actions.
 - Encrypts history and attachments with a Keychain-protected key; includes per-app exclusions, privacy rules, concealed items, and encrypted backups.
-- Includes English and Simplified Chinese interfaces. It has no ClipNest account, telemetry, or cloud sync.
+- Includes English and Simplified Chinese interfaces. It has no Clipskein account, telemetry, or cloud sync.
 
 The [feature reference](docs/FEATURES.md) describes the detailed behavior and limits.
 
@@ -32,10 +38,10 @@ The minimum deployment target is not a claim that every OS and hardware combinat
 Clone the repository and build the app:
 
 ```bash
-git clone https://github.com/Kryptonzy/ClipNest.git
-cd ClipNest
+git clone https://github.com/Kryptonzy/Clipskein.git
+cd Clipskein
 zsh build-app.sh
-open dist/ClipNest.app
+open dist/Clipskein.app
 ```
 
 This produces an ad-hoc signed local build. Use the app bundle for normal testing; `zsh run.sh` is a development-only SwiftPM launch. Rebuilding with ad-hoc signing can trigger new Keychain or permission prompts. A stable Apple Development identity is useful for repeated local upgrades; public distribution requires Developer ID signing and notarization.
@@ -60,13 +66,15 @@ Compile once, then run functional tests and the two performance tests separately
 
 Live data is stored in `~/Library/Application Support/ClipNest`; the encryption key is stored in macOS Keychain. File clips reference the original files rather than copying their contents. Keep a password-encrypted backup before moving or resetting the application. Do not delete the Keychain key to resolve a prompt: encrypted history needs that key.
 
+Clipskein was previously named ClipNest during development. Its internal storage, bundle identity, and backup format keep their existing identifiers so a display-name change does not disconnect saved data. Existing users should follow the [upgrade notes](docs/BUILDING.md#upgrade-an-existing-clipnest-installation).
+
 Clipboard monitoring necessarily sees content copied by other applications. Configure exclusions and privacy rules in Settings. Automatic secret detection is heuristic and cannot guarantee recognition of every sensitive value. Deliberate copy, paste, drag, and export actions place the selected data outside the encrypted store.
 
 Backup imports merge into the library and still follow your history size and retention limits. Import is not an all-or-nothing transaction across history, attachments, and collections: a failed operation can leave partial changes. Keep the original backup, resolve the reported storage problem, retry saving or importing, and verify the result after relaunch before discarding the backup.
 
 ## Project status
 
-ClipNest is an early-stage macOS application available as source. Build locally using the instructions above; there is no notarized app download yet.
+Clipskein is an early-stage macOS application available as source. Build locally using the instructions above; there is no notarized app download yet.
 
 Automatic updates are not integrated. Payments, license activation, and trial enforcement are not connected to a provider; ordinary builds remain fully enabled. A successful local signature check does not mean the app is notarized or approved by Gatekeeper for distribution.
 
@@ -82,4 +90,4 @@ Source code lives in `Sources/ClipNest`, regression tests in `Tests/ClipNestTest
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and pull requests, and [SECURITY.md](SECURITY.md) for private vulnerability reports.
 
-Code, documentation, and the included icon assets are distributed under the [MIT license](LICENSE). The icon's generation record is kept in [Packaging/ICON_PROMPT.md](Packaging/ICON_PROMPT.md).
+Code, documentation, and the included icon assets are distributed under the [MIT license](LICENSE). The [brand and asset notes](Packaging/BRAND.md) describe the design source and reproducible asset build.

@@ -8,7 +8,7 @@ enum ImageExportPanel {
     panel.title = L10n.text("image_export.title", fallback: "Export Image")
     panel.message = L10n.text(
       "image_export.message",
-      fallback: "Save a decrypted copy outside ClipNest’s protected storage."
+      fallback: "Save a decrypted copy outside Clipskein’s protected storage."
     )
     panel.prompt = L10n.text("image_export.save", fallback: "Export")
     panel.allowedContentTypes = [item.isGIF ? .gif : .png]

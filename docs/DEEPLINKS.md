@@ -1,22 +1,25 @@
 # Safe automation links
 
-ClipNest registers the `clipnest://` URL scheme so Shortcuts, Raycast, browsers, shell scripts,
+Clipskein registers the `clipskein://` URL scheme so Shortcuts, Raycast, browsers, shell scripts,
 and other local automation can navigate the app without receiving clipboard data or silently
 triggering a paste.
 
+New links use `clipskein://`. Existing `clipnest://` links remain supported with the same commands
+and validation rules, so saved shortcuts do not need to be rewritten immediately.
+
 Supported links:
 
-- `clipnest://open` — show the main library.
-- `clipnest://search?q=invoice%20total` — show the library and search for the decoded query.
-- `clipnest://picker` — open Quick Picker.
-- `clipnest://picker?q=%23work` — open Quick Picker with an initial query.
-- `clipnest://new` — open a blank reusable-snippet draft.
-- `clipnest://snippets` — open the snippet and `@alias` picker.
-- `clipnest://actions` — open Text Actions.
-- `clipnest://board?name=Launch%20Kit` — open an existing Pinboard by name.
+- `clipskein://open` — show the main library.
+- `clipskein://search?q=invoice%20total` — show the library and search for the decoded query.
+- `clipskein://picker` — open Quick Picker.
+- `clipskein://picker?q=%23work` — open Quick Picker with an initial query.
+- `clipskein://new` — open a blank reusable-snippet draft.
+- `clipskein://snippets` — open the snippet and `@alias` picker.
+- `clipskein://actions` — open Text Actions.
+- `clipskein://board?name=Launch%20Kit` — open an existing Pinboard by name.
 
 Settings → Automation includes ready-to-copy examples, a safe custom search-link
-builder, and a menu that generates links for existing Pinboards. ClipNest performs the query and
+builder, and a menu that generates links for existing Pinboards. Clipskein performs the query and
 Pinboard-name encoding, then marks those copies as app-generated so they do not re-enter clipboard
 history.
 

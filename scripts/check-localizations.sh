@@ -71,7 +71,7 @@ hardcoded_controls=$(
       "$PROJECT_DIR/Sources/ClipNest" --glob '*.swift' || true
     rg -n '(navigationTitle|confirmationDialog|alert|help|accessibilityLabel)\("[A-Za-z][^"\n]*"' \
       "$PROJECT_DIR/Sources/ClipNest" --glob '*.swift' || true
-  } | rg -v 'Text\("(CLIPNEST|ClipNest|ESC|regex:|app:Safari|after:2026-09-01|before:2026-10-01)"\)' || true
+  } | rg -v 'Text\("(CLIPSKEIN|Clipskein|ESC|regex:|app:Safari|after:2026-09-01|before:2026-10-01)"\)|accessibilityLabel\("Clipskein"\)' || true
 )
 if [[ -n "$hardcoded_controls" ]]; then
   print -u2 "Hard-coded SwiftUI labels and presentation copy must use L10n:"

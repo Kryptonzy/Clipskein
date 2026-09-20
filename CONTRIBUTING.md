@@ -1,10 +1,10 @@
-# Contributing to ClipNest
+# Contributing to Clipskein
 
 Bug reports, focused fixes, localization improvements, and documentation corrections are welcome. For a larger feature or architecture change, open an issue describing the user problem before starting implementation.
 
 ## Report a problem
 
-Use [GitHub Issues](https://github.com/Kryptonzy/ClipNest/issues) for ordinary bugs. Include the macOS version, Mac architecture, app build or commit, steps to reproduce, and expected versus actual behavior. For build failures, also include the Xcode and Swift versions.
+Use [GitHub Issues](https://github.com/Kryptonzy/Clipskein/issues) for ordinary bugs. Include the macOS version, Mac architecture, app build or commit, steps to reproduce, and expected versus actual behavior. For build failures, also include the Xcode and Swift versions.
 
 Use synthetic clipboard examples. Remove personal data from screenshots and logs; never attach your clipboard history, backups, encryption keys, passwords, or signing credentials. Report suspected security vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 

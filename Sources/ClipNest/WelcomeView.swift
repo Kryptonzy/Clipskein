@@ -16,26 +16,23 @@ struct WelcomeView: View {
     self.finish = finish
   }
 
-  private let ink = Color(red: 0.09, green: 0.12, blue: 0.16)
-  private let cobalt = Color(red: 0.18, green: 0.35, blue: 0.78)
-  private let apricot = Color(red: 0.98, green: 0.61, blue: 0.36)
+  private let textColor = BrandTheme.text
+  private let actionColor = BrandTheme.action
 
   var body: some View {
     VStack(alignment: .leading, spacing: 24) {
       HStack(alignment: .top, spacing: 16) {
-        Image(systemName: "square.on.square.intersection.dashed")
-          .font(.system(size: 30, weight: .semibold))
-          .foregroundStyle(apricot)
+        ClipskeinMark()
           .frame(width: 54, height: 54)
-          .background(ink, in: RoundedRectangle(cornerRadius: 15))
+          .accessibilityHidden(true)
 
         VStack(alignment: .leading, spacing: 5) {
-          Text(L10n.text("welcome.title", fallback: "Welcome to ClipNest"))
-            .font(.system(size: 26, weight: .bold, design: .rounded))
+          Text(L10n.text("welcome.title", fallback: "Welcome to Clipskein"))
+            .font(.system(size: 26, weight: .semibold, design: .rounded))
           Text(
             L10n.text(
               "welcome.subtitle",
-              fallback: "Your searchable clipboard is already running."
+              fallback: "Find. Arrange. Reuse."
             )
           )
           .font(.system(size: 14, weight: .medium))
@@ -50,7 +47,7 @@ struct WelcomeView: View {
           detail: L10n.text(
             "welcome.private.detail",
             fallback:
-              "Everything stays on this Mac, and likely one-time codes expire automatically."
+              "Clips are stored locally, and likely one-time codes expire automatically."
           ),
           status: L10n.text("welcome.ready", fallback: "Ready"),
           statusColor: .green
@@ -64,7 +61,7 @@ struct WelcomeView: View {
               "Search history, fill snippets, transform text, or capture screen text without breaking focus."
           ),
           status: L10n.text("welcome.keyboard_first", fallback: "KEYBOARD FIRST"),
-          statusColor: cobalt
+          statusColor: actionColor
         )
       }
 
@@ -115,7 +112,7 @@ struct WelcomeView: View {
               L10n.text(
                 "welcome.accessibility.detail",
                 fallback:
-                  "Accessibility lets Return paste into the app you came from and lets Text Actions transform the current selection. Without it, ClipNest copies safely and uses recent text instead."
+                  "Accessibility lets Return paste into the app you came from and lets Text Actions transform the current selection. Without it, Clipskein copies safely and uses recent text instead."
               )
             )
             .font(.system(size: 12))
@@ -145,12 +142,12 @@ struct WelcomeView: View {
               permissions.refresh()
             }
             .buttonStyle(.plain)
-            .foregroundStyle(cobalt)
+            .foregroundStyle(actionColor)
             Button(L10n.text("welcome.open_settings", fallback: "Open Settings")) {
               permissions.openAccessibilitySettings()
             }
             .buttonStyle(.plain)
-            .foregroundStyle(cobalt)
+            .foregroundStyle(actionColor)
           }
         }
       }
@@ -177,7 +174,7 @@ struct WelcomeView: View {
 
         Spacer()
 
-        Button(L10n.text("welcome.start", fallback: "Start using ClipNest")) { finish() }
+        Button(L10n.text("welcome.start", fallback: "Start using Clipskein")) { finish() }
           .buttonStyle(.borderedProminent)
           .controlSize(.large)
           .keyboardShortcut(.defaultAction)
@@ -185,6 +182,9 @@ struct WelcomeView: View {
     }
     .padding(30)
     .frame(width: 660)
+    .background(BrandTheme.canvas)
+    .foregroundStyle(textColor)
+    .tint(actionColor)
     .interactiveDismissDisabled()
     .confirmationDialog(
       L10n.format(
@@ -214,7 +214,7 @@ struct WelcomeView: View {
         L10n.text(
           "settings.import_existing_screenshots.confirm_detail",
           fallback:
-            "Only likely screenshots in the folder configured by macOS are considered. Files stay in place; ClipNest imports encrypted copies and runs OCR locally."
+            "Only likely screenshots in the folder configured by macOS are considered. Files stay in place; Clipskein imports encrypted copies and runs OCR locally."
         )
       )
     }
@@ -230,9 +230,9 @@ struct WelcomeView: View {
     HStack(alignment: .top, spacing: 14) {
       Image(systemName: "photo.stack")
         .font(.system(size: 17, weight: .semibold))
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
         .frame(width: 34, height: 34)
-        .background(cobalt.opacity(0.09), in: RoundedRectangle(cornerRadius: 9))
+        .background(actionColor.opacity(0.09), in: RoundedRectangle(cornerRadius: 9))
 
       VStack(alignment: .leading, spacing: 5) {
         Text(L10n.text("welcome.screenshot_inbox.title", fallback: "Screenshot Inbox"))
@@ -261,7 +261,7 @@ struct WelcomeView: View {
               Task { await store.retryScreenshotWatching() }
             }
             .buttonStyle(.plain)
-            .foregroundStyle(cobalt)
+            .foregroundStyle(actionColor)
             .disabled(store.isRetryingScreenshotWatch)
           }
           .font(.system(size: 10, weight: .semibold))
@@ -300,10 +300,10 @@ struct WelcomeView: View {
         }
         .buttonStyle(.plain)
         .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
         .disabled(isDiscoveringExistingScreenshots || store.imageImportProgress != nil)
 
-        ScreenshotImportStatusView(store: store, accentColor: cobalt)
+        ScreenshotImportStatusView(store: store, accentColor: actionColor)
       }
 
       Spacer(minLength: 18)
@@ -333,7 +333,7 @@ struct WelcomeView: View {
     VStack(alignment: .leading, spacing: 10) {
       HStack {
         Image(systemName: icon)
-          .foregroundStyle(cobalt)
+          .foregroundStyle(actionColor)
         Spacer()
         Text(status)
           .font(.system(size: 10, weight: .bold, design: .monospaced))
@@ -360,9 +360,9 @@ struct WelcomeView: View {
     HStack(spacing: 12) {
       Image(systemName: systemImage)
         .font(.system(size: 15, weight: .semibold))
-        .foregroundStyle(cobalt)
+        .foregroundStyle(actionColor)
         .frame(width: 30, height: 30)
-        .background(cobalt.opacity(0.09), in: RoundedRectangle(cornerRadius: 8))
+        .background(actionColor.opacity(0.09), in: RoundedRectangle(cornerRadius: 8))
       VStack(alignment: .leading, spacing: 2) {
         Text(title)
           .font(.system(size: 12, weight: .bold))
@@ -374,7 +374,7 @@ struct WelcomeView: View {
       Spacer(minLength: 6)
       Text(shortcut)
         .font(.system(size: 10, weight: .bold, design: .monospaced))
-        .foregroundStyle(shortcut == "Off" ? Color.orange : cobalt)
+        .foregroundStyle(shortcut == "Off" ? Color.orange : actionColor)
         .padding(.horizontal, 7)
         .frame(height: 23)
         .background(Color.primary.opacity(0.045), in: RoundedRectangle(cornerRadius: 6))

@@ -13,7 +13,7 @@ Run the non-destructive preflight before integrating or publishing the updater:
 
 ```bash
 CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
-SPARKLE_FEED_URL="https://updates.your-domain.tld/clipnest/appcast.xml" \
+SPARKLE_FEED_URL="https://updates.your-domain.tld/clipskein/appcast.xml" \
 SPARKLE_PUBLIC_ED_KEY="PUBLIC_KEY_FROM_GENERATE_KEYS" \
 SPARKLE_GENERATE_APPCAST="/path/to/Sparkle/bin/generate_appcast" \
 zsh scripts/check-sparkle-prerequisites.sh

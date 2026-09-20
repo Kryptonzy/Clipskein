@@ -20,16 +20,17 @@ enum SecureLocalStorageError: LocalizedError {
     case .keychain(let status):
       L10n.format(
         "storage.error.keychain",
-        fallback: "The macOS Keychain could not provide ClipNest's local encryption key (%d).",
+        fallback: "The macOS Keychain could not provide Clipskein's local encryption key (%d).",
         status
       )
     }
   }
 }
 
-/// Encrypts ClipNest's live local store. The recognizable prefix lets us migrate legacy plaintext
+/// Encrypts Clipskein's live local store. The legacy prefix lets us migrate plaintext
 /// files without ever guessing whether damaged ciphertext is plaintext.
 struct SecureLocalStorage: Sendable {
+  // This is a persisted format marker, not a display-brand string.
   private static let envelopePrefix = Data("CLIPNEST-SEALED\u{0}\u{1}".utf8)
   private let key: SymmetricKey
 
@@ -79,6 +80,7 @@ struct SecureLocalStorage: Sendable {
 }
 
 private enum LocalStorageKeychain {
+  // Retain the original service/account so existing encrypted history stays unlockable.
   private static let service = "app.clipnest.ClipNest.secure-local-storage"
   private static let account = "primary"
 

@@ -130,7 +130,7 @@ struct ClipNestApp: App {
         }
       }
       Divider()
-      Button(L10n.text("menu.open_app", fallback: "Open ClipNest")) {
+      Button(L10n.text("menu.open_app", fallback: "Open Clipskein")) {
         AppDelegate.showMainWindow()
       }
       Button(newSnippetMenuTitle) {
@@ -206,7 +206,7 @@ struct ClipNestApp: App {
         AppDelegate.showMainWindow()
       }
       SettingsLink { Text(L10n.text("menu.settings", fallback: "Settings…")) }
-      Button(L10n.text("menu.quit", fallback: "Quit ClipNest")) { NSApp.terminate(nil) }
+      Button(L10n.text("menu.quit", fallback: "Quit Clipskein")) { NSApp.terminate(nil) }
     } label: {
       Image(systemName: store.isMonitoring ? "square.on.square" : "pause.circle")
         .accessibilityLabel(menuBarStatusLabel)
@@ -214,7 +214,7 @@ struct ClipNestApp: App {
   }
 
   private var menuBarStatusLabel: String {
-    L10n.format("menu.status_label", fallback: "ClipNest — %@", menuMonitoringStatus)
+    L10n.format("menu.status_label", fallback: "Clipskein — %@", menuMonitoringStatus)
   }
 
   private var menuMonitoringStatus: String {

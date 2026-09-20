@@ -42,7 +42,7 @@ struct SupportDiagnostics: Equatable, Sendable {
 
   var report: String {
     """
-    ClipNest diagnostics
+    Clipskein diagnostics
     Version: \(appVersion) (\(buildNumber))
     macOS: \(operatingSystem)
     Architecture: \(architecture)

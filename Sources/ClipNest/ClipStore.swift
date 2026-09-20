@@ -784,6 +784,7 @@ final class ClipStore: ObservableObject {
     let usesLiveStore = rootURL == nil
     let needsAsynchronousStorageUnlock =
       (asynchronouslyLoadsStorageProtector ?? usesLiveStore) && storageProtector == nil
+    // The display-name change must not move or orphan existing local history.
     let base =
       rootURL
       ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -861,7 +862,7 @@ final class ClipStore: ObservableObject {
         message: L10n.text("storage.unlocking", fallback: "Unlocking local history…"),
         detail: L10n.text(
           "storage.unlocking_detail",
-          fallback: "ClipNest is waiting for macOS Keychain. History stays locked and unchanged."
+          fallback: "Clipskein is waiting for macOS Keychain. History stays locked and unchanged."
         ),
         recoveryFileName: nil
       )
@@ -1625,7 +1626,7 @@ final class ClipStore: ObservableObject {
 
     addText(
       text,
-      source: source ?? "Created in ClipNest",
+      source: source ?? "Created in Clipskein",
       sourceBundleIdentifier: sourceBundleIdentifier,
       isConcealed: shouldConceal,
       customTitle: metadata.title,
@@ -1635,7 +1636,7 @@ final class ClipStore: ObservableObject {
     )
     guard let index = items.firstIndex(where: { $0.fingerprint == fingerprint }) else {
       return .invalid(
-        L10n.text("new_snippet.error_save", fallback: "ClipNest could not save this snippet.")
+        L10n.text("new_snippet.error_save", fallback: "Clipskein could not save this snippet.")
       )
     }
 
@@ -1928,7 +1929,7 @@ final class ClipStore: ObservableObject {
     guard case .success(let snapshots) = result else {
       screenshotWatchIssue = L10n.text(
         "screenshot_watch.read_failed",
-        fallback: "ClipNest cannot read the screenshot folder. Check folder access and try again.")
+        fallback: "Clipskein cannot read the screenshot folder. Check folder access and try again.")
       return
     }
     screenshotWatchIssue = nil
@@ -2422,7 +2423,7 @@ final class ClipStore: ObservableObject {
     }
     addText(
       text,
-      source: "Edited in ClipNest",
+      source: "Edited in Clipskein",
       isConcealed: stored.isConcealed,
       customTitle: editedTitle,
       tags: stored.tags,
@@ -3135,7 +3136,7 @@ final class ClipStore: ObservableObject {
       showNotice(
         L10n.text(
           "screenshot_import.discovery_failed",
-          fallback: "ClipNest could not read the screenshot folder"
+          fallback: "Clipskein could not read the screenshot folder"
         ),
         systemImage: "folder.badge.questionmark"
       )
@@ -3282,7 +3283,7 @@ final class ClipStore: ObservableObject {
     }
     isCapturingRegion = true
     let captureURL = FileManager.default.temporaryDirectory
-      .appendingPathComponent("ClipNest-Capture-\(UUID().uuidString).png")
+      .appendingPathComponent("Clipskein-Capture-\(UUID().uuidString).png")
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
     process.arguments = ["-i", "-o", captureURL.path]
@@ -4561,7 +4562,7 @@ final class ClipStore: ObservableObject {
       message: L10n.text("storage.unlocking", fallback: "Unlocking local history…"),
       detail: L10n.text(
         "storage.unlocking_detail",
-        fallback: "ClipNest is waiting for macOS Keychain. History stays locked and unchanged."
+        fallback: "Clipskein is waiting for macOS Keychain. History stays locked and unchanged."
       ),
       recoveryFileName: nil
     )
@@ -4576,7 +4577,7 @@ final class ClipStore: ObservableObject {
         detail: L10n.text(
           "storage.keychain_waiting_detail",
           fallback:
-            "Unlock your login keychain or approve any ClipNest access prompt. Encrypted history remains unchanged."
+            "Unlock your login keychain or approve any Clipskein access prompt. Encrypted history remains unchanged."
         ),
         recoveryFileName: nil
       )
@@ -4838,7 +4839,7 @@ final class ClipStore: ObservableObject {
 
     let fileManager = FileManager.default
     let temporary = destination.deletingLastPathComponent().appendingPathComponent(
-      ".ClipNest-export-\(UUID().uuidString).tmp"
+      ".Clipskein-export-\(UUID().uuidString).tmp"
     )
     defer { try? fileManager.removeItem(at: temporary) }
     do {
@@ -6623,7 +6624,7 @@ final class ClipStore: ObservableObject {
         detail: L10n.text(
           "storage.history_preserved_detail",
           fallback:
-            "ClipNest started with an empty history. The original file is still available for recovery."
+            "Clipskein started with an empty history. The original file is still available for recovery."
         ),
         recoveryFileName: recoveryName
       )
@@ -6635,7 +6636,7 @@ final class ClipStore: ObservableObject {
           "storage.history_blocked", fallback: "History cannot be opened safely"),
         detail: L10n.format(
           "storage.history_blocked_detail",
-          fallback: "ClipNest will not overwrite the unreadable history file. %@ %@",
+          fallback: "Clipskein will not overwrite the unreadable history file. %@ %@",
           originalError.localizedDescription,
           error.localizedDescription),
         recoveryFileName: nil
@@ -6649,7 +6650,7 @@ final class ClipStore: ObservableObject {
       message: L10n.text("storage.not_saving", fallback: "History is not being saved"),
       detail: L10n.format(
         "storage.not_saving_detail",
-        fallback: "New changes may be lost when ClipNest quits. %@",
+        fallback: "New changes may be lost when Clipskein quits. %@",
         error.localizedDescription),
       recoveryFileName: nil
     )

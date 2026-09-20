@@ -308,12 +308,18 @@ struct ClipItem: Identifiable, Codable, Hashable, Sendable {
     switch sourceApplication {
     case "Unknown app":
       L10n.text("clip.source.unknown", fallback: "Unknown app", language: language)
-    case "Created in ClipNest", "在 ClipNest 中创建":
+    case "Created in Clipskein", "在 Clipskein 中创建", "Created in ClipNest", "在 ClipNest 中创建":
       L10n.text(
-        "clip.source.created", fallback: "Created in ClipNest", language: language)
-    case "Edited in ClipNest", "在 ClipNest 中编辑":
+        "clip.source.created", fallback: "Created in Clipskein", language: language)
+    case "Edited in Clipskein", "在 Clipskein 中编辑", "Edited in ClipNest", "在 ClipNest 中编辑":
       L10n.text(
-        "clip.source.edited", fallback: "Edited in ClipNest", language: language)
+        "clip.source.edited", fallback: "Edited in Clipskein", language: language)
+    case "Clipskein Local Intelligence", "Clipskein 本地智能", "ClipNest Local Intelligence", "ClipNest 本地智能":
+      L10n.text(
+        "generated.source.intelligence", fallback: "Clipskein Local Intelligence", language: language)
+    case "Clipskein Local Translation", "Clipskein 本地翻译", "ClipNest Local Translation", "ClipNest 本地翻译":
+      L10n.text(
+        "generated.source.translation", fallback: "Clipskein Local Translation", language: language)
     case "Selected text", "所选文本":
       L10n.text("clip.source.selected_text", fallback: "Selected text", language: language)
     case "Screenshot", "截图":
@@ -371,14 +377,14 @@ extension ClipItem {
       let formatter = DateFormatter()
       formatter.locale = Locale(identifier: "en_US_POSIX")
       formatter.dateFormat = "yyyy-MM-dd HH.mm.ss"
-      rawBase = "ClipNest Screenshot \(formatter.string(from: createdAt))"
+      rawBase = "Clipskein Screenshot \(formatter.string(from: createdAt))"
     }
     let safe = rawBase.map { character -> Character in
       character.isLetter || character.isNumber || " -_.".contains(character)
         ? character : "-"
     }
     let base = String(safe).trimmingCharacters(in: .whitespacesAndNewlines)
-    return "\(String((base.isEmpty ? "ClipNest Screenshot" : base).prefix(100))).\(fileExtension)"
+    return "\(String((base.isEmpty ? "Clipskein Screenshot" : base).prefix(100))).\(fileExtension)"
   }
 }
 

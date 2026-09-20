@@ -379,9 +379,9 @@ struct QuickPickerView: View {
   var body: some View {
     VStack(spacing: 0) {
       HStack(spacing: 12) {
-        Image(systemName: "square.on.square.intersection.dashed")
-          .font(.system(size: 18, weight: .semibold))
-          .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+        ClipskeinMark()
+          .frame(width: 26, height: 26)
+          .accessibilityHidden(true)
         TextField(
           L10n.text("picker.search_placeholder", fallback: "Find anything or type @alias"),
           text: $query
@@ -392,7 +392,7 @@ struct QuickPickerView: View {
         if isAliasMode {
           Text(L10n.text("picker.aliases", fallback: "ALIASES"))
             .font(.system(size: 9, weight: .black, design: .monospaced))
-            .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+            .foregroundStyle(BrandTheme.accentOnDark)
             .padding(.horizontal, 7)
             .frame(height: 23)
             .background(Color.white.opacity(0.08), in: Capsule())
@@ -444,7 +444,7 @@ struct QuickPickerView: View {
             .frame(maxWidth: 112, minHeight: 23)
             .foregroundStyle(
               usesAppContext
-                ? Color(red: 0.98, green: 0.61, blue: 0.36) : Color.white.opacity(0.82)
+                ? BrandTheme.accentOnDark : Color.white.opacity(0.82)
             )
             .background(Color.white.opacity(0.08), in: Capsule())
           }
@@ -556,7 +556,7 @@ struct QuickPickerView: View {
           }
         }
         .font(.system(size: 10, weight: .semibold, design: .monospaced))
-        .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+        .foregroundStyle(BrandTheme.accentOnDark)
         .padding(.horizontal, 18)
         .frame(height: 30)
         .background(Color.white.opacity(0.045))
@@ -637,12 +637,12 @@ struct QuickPickerView: View {
             semanticStatus.isPreparing
               ? L10n.text(
                 "semantic.empty.preparing_detail",
-                fallback: "ClipNest is building a private, on-device meaning index."
+                fallback: "Clipskein is building a private, on-device meaning index."
               )
               : (query.isEmpty
               ? L10n.text(
                 "picker.empty.clipboard.detail",
-                fallback: "Copy text or an image, then open ClipNest again."
+                fallback: "Copy text or an image, then open Clipskein again."
               )
               : (isAliasMode
                 ? L10n.text(
@@ -878,7 +878,7 @@ struct QuickPickerView: View {
           }
         }
         .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+        .foregroundStyle(BrandTheme.accentOnDark)
         .padding(.horizontal, 18)
         .frame(height: 34)
       }
@@ -995,9 +995,12 @@ struct QuickPickerView: View {
       .frame(width: 0, height: 0)
     }
     .foregroundStyle(.white)
+    .tint(BrandTheme.softPlum)
+    .accentColor(BrandTheme.softPlum)
+    .environment(\.colorScheme, .dark)
     .background(
       RoundedRectangle(cornerRadius: 18)
-        .fill(Color(red: 0.075, green: 0.095, blue: 0.125))
+        .fill(BrandTheme.popoverBackground)
         .overlay(
           RoundedRectangle(cornerRadius: 18)
             .stroke(Color.white.opacity(0.12), lineWidth: 1)
@@ -1144,7 +1147,7 @@ struct QuickPickerView: View {
       .font(.system(size: 12, weight: .bold))
       .foregroundStyle(
         activeSourceApplicationFacets.isEmpty
-          ? Color.white.opacity(0.82) : Color(red: 0.98, green: 0.61, blue: 0.36)
+          ? Color.white.opacity(0.82) : BrandTheme.accentOnDark
       )
       .frame(width: 25, height: 23)
       .background(Color.white.opacity(0.08), in: Capsule())
@@ -1941,7 +1944,7 @@ private struct QuickPickerRow: View {
         options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive]
       )
     else { return attributed }
-    attributed[range].foregroundColor = Color(red: 0.98, green: 0.61, blue: 0.36)
+    attributed[range].foregroundColor = isSelected ? BrandTheme.selectedAccent : BrandTheme.accentOnDark
     attributed[range].font = .system(size: 13, weight: .bold)
     return attributed
   }
@@ -1979,7 +1982,7 @@ private struct QuickPickerRow: View {
     HStack(spacing: 12) {
       Text("⌘\(shortcutNumber)")
         .font(.system(size: 9, weight: .bold, design: .monospaced))
-        .foregroundStyle(isSelected ? Color.black.opacity(0.55) : Color.white.opacity(0.42))
+        .foregroundStyle(isSelected ? BrandTheme.selectedText.opacity(0.75) : Color.white.opacity(0.65))
         .frame(width: 20)
 
       Group {
@@ -1998,7 +2001,7 @@ private struct QuickPickerRow: View {
               Color.white.opacity(0.07)
               Image(systemName: "photo.fill")
                 .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(Color(red: 0.45, green: 0.62, blue: 1))
+                .foregroundStyle(isSelected ? BrandTheme.plum : BrandTheme.softTeal)
             }
             .task(id: item.imageFileName) { store.requestDecodedImage(for: item) }
           }
@@ -2007,7 +2010,7 @@ private struct QuickPickerRow: View {
             Color.white.opacity(0.07)
             Image(systemName: item.filePaths.count > 1 ? "doc.on.doc.fill" : "doc.fill")
               .font(.system(size: 13, weight: .bold))
-              .foregroundStyle(Color(red: 0.45, green: 0.62, blue: 1))
+              .foregroundStyle(isSelected ? BrandTheme.plum : BrandTheme.softTeal)
           }
         } else if let color = item.contentAnalysis.color {
           Color(red: color.red, green: color.green, blue: color.blue, opacity: color.alpha)
@@ -2016,7 +2019,7 @@ private struct QuickPickerRow: View {
             Color.white.opacity(0.07)
             Image(systemName: item.privacySafeContentKind.systemImage)
               .font(.system(size: 13, weight: .bold))
-              .foregroundStyle(Color(red: 0.45, green: 0.62, blue: 1))
+              .foregroundStyle(isSelected ? BrandTheme.plum : BrandTheme.softTeal)
           }
         }
       }
@@ -2059,21 +2062,21 @@ private struct QuickPickerRow: View {
             Text(format)
           }
           Text("·")
-          Text(item.createdAt, style: .relative)
+          Text(item.createdAt, style: .relative).monospacedDigit()
           if let semanticConfidence {
             Text("·")
             Label(semanticConfidence.localizedLabel, systemImage: semanticConfidence.systemImage)
-              .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+              .foregroundStyle(isSelected ? BrandTheme.selectedAccent : BrandTheme.accentOnDark)
           }
         }
         .font(.system(size: 10, weight: .medium))
-        .foregroundStyle(.secondary)
+        .foregroundStyle(isSelected ? BrandTheme.selectedText.opacity(0.76) : Color.white.opacity(0.70))
       }
       Spacer()
       if let alias = item.alias {
         Text("@\(alias)")
           .font(.system(size: 9, weight: .bold, design: .monospaced))
-          .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+          .foregroundStyle(isSelected ? BrandTheme.selectedAccent : BrandTheme.accentOnDark)
           .padding(.horizontal, 6)
           .frame(height: 19)
           .background(Color.white.opacity(0.07), in: Capsule())
@@ -2085,7 +2088,7 @@ private struct QuickPickerRow: View {
         )
         .labelStyle(.iconOnly)
         .font(.system(size: 10, weight: .bold))
-        .foregroundStyle(Color(red: 0.51, green: 0.76, blue: 1))
+        .foregroundStyle(isSelected ? BrandTheme.plum : BrandTheme.softTeal)
         .help(
           L10n.text(
             "picker.row.template.help", fallback: "Fill dynamic fields before pasting")
@@ -2095,13 +2098,13 @@ private struct QuickPickerRow: View {
       if item.isPinned {
         Image(systemName: "pin.fill")
           .font(.system(size: 10))
-          .foregroundStyle(Color(red: 0.98, green: 0.61, blue: 0.36))
+          .foregroundStyle(isSelected ? BrandTheme.selectedAccent : BrandTheme.accentOnDark)
           .accessibilityLabel(L10n.text("picker.row.pinned", fallback: "Pinned"))
       }
       if store.isInStack(item) {
         Image(systemName: "square.stack.3d.up.fill")
           .font(.system(size: 10, weight: .bold))
-          .foregroundStyle(Color(red: 0.45, green: 0.62, blue: 1))
+          .foregroundStyle(isSelected ? BrandTheme.plum : BrandTheme.softTeal)
           .accessibilityLabel(L10n.text("picker.row.in_stack", fallback: "In Stack"))
       }
       if let contextAction {
@@ -2115,7 +2118,7 @@ private struct QuickPickerRow: View {
             .padding(.horizontal, 7)
             .frame(maxWidth: 112, minHeight: 21)
             .background(
-              Color(red: 0.98, green: 0.61, blue: 0.36).opacity(0.14),
+              BrandTheme.accentOnDark.opacity(0.14),
               in: Capsule()
             )
         }
@@ -2142,7 +2145,7 @@ private struct QuickPickerRow: View {
         Button(action: onPreview) {
           Image(systemName: "eye")
             .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(isSelected ? BrandTheme.selectedText.opacity(0.76) : Color.white.opacity(0.70))
         }
         .buttonStyle(.plain)
         .help(
@@ -2164,7 +2167,7 @@ private struct QuickPickerRow: View {
         } label: {
           Image(systemName: "ellipsis.circle")
             .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(isSelected ? BrandTheme.selectedText.opacity(0.76) : Color.white.opacity(0.70))
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
@@ -2176,7 +2179,8 @@ private struct QuickPickerRow: View {
       }
     }
     .padding(.vertical, 5)
-    .foregroundStyle(isSelected ? Color(red: 0.08, green: 0.10, blue: 0.14) : Color.white)
+    .foregroundStyle(isSelected ? BrandTheme.selectedText : Color.white)
+    .background(isSelected ? BrandTheme.softPlum : Color.clear)
     .accessibilityElement(children: .ignore)
     .accessibilityLabel(accessibilitySummary)
     .accessibilityHint(

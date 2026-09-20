@@ -303,7 +303,7 @@ struct ClipNestTests {
     #expect(edited.tags == ["Work", "Draft"])
     #expect(edited.isConcealed)
     #expect(edited.isPinned)
-    #expect(edited.sourceApplication == "Edited in ClipNest")
+    #expect(edited.sourceApplication == "Edited in Clipskein")
     #expect(store.searchText.isEmpty)
     #expect(store.filter == .all)
     #expect(store.selectedTag == nil)
@@ -3561,9 +3561,11 @@ struct ClipNestTests {
     defer { try? FileManager.default.removeItem(at: directory) }
     let probe = ControllableImageAnalysisProbe()
     let loadObservation = ThreadObservation()
+    let protector = try SecureLocalStorage(keyData: Data(repeating: 0x59, count: 32))
     let store = ClipStore(
       rootURL: directory,
       startsMonitoring: false,
+      storageProtector: protector,
       imageAnalyzer: { data in await probe.analyze(data) },
       storedImageDataLoader: { url, protector, requiresProtection in
         loadObservation.recordIsMainThread()
@@ -3608,8 +3610,10 @@ struct ClipNestTests {
 
     let resumeStartedAt = ProcessInfo.processInfo.systemUptime
     store.resumeAfterInactiveSession()
+    // Measure the synchronous UI call, not Task.sleep's unbounded scheduler delay.
+    // The slow loader's independent thread probe below still rejects main-thread I/O.
+    let resumeCallDuration = ProcessInfo.processInfo.systemUptime - resumeStartedAt
     try await Task.sleep(for: .milliseconds(20))
-    let resumeMainActorDelay = ProcessInfo.processInfo.systemUptime - resumeStartedAt
     for _ in 0..<100 {
       if await probe.snapshot().calls >= 2 { break }
       try await Task.sleep(for: .milliseconds(10))
@@ -3620,7 +3624,8 @@ struct ClipNestTests {
       try await Task.sleep(for: .milliseconds(10))
     }
     let analysis = await probe.snapshot()
-    #expect(resumeMainActorDelay < 0.08)
+    print("Clipskein benchmark: resume call = \(resumeCallDuration)s")
+    #expect(resumeCallDuration < 0.08)
     #expect(loadObservation.callCount == 1)
     #expect(!loadObservation.observedMainThread)
     #expect(analysis.calls == 2)
@@ -4364,9 +4369,9 @@ struct ClipNestTests {
     #expect(
       L10n.text(
         "welcome.title",
-        fallback: "Welcome to ClipNest",
+        fallback: "Welcome to Clipskein",
         language: "zh_Hans_CN"
-      ) == "欢迎使用 ClipNest"
+      ) == "欢迎使用 Clipskein"
     )
     #expect(
       L10n.format(
@@ -4708,14 +4713,14 @@ struct ClipNestTests {
       sourceApplication: "Created in ClipNest",
       fingerprint: "localized-created-source"
     )
-    #expect(created.localizedSourceApplication(language: "zh-Hans") == "在 ClipNest 中创建")
+    #expect(created.localizedSourceApplication(language: "zh-Hans") == "在 Clipskein 中创建")
     let legacyEdited = ClipItem(
       kind: .text,
       text: "Edited text",
       sourceApplication: "在 ClipNest 中编辑",
       fingerprint: "localized-edited-source"
     )
-    #expect(legacyEdited.localizedSourceApplication(language: "en") == "Edited in ClipNest")
+    #expect(legacyEdited.localizedSourceApplication(language: "en") == "Edited in Clipskein")
     let screenshot = ClipItem(
       kind: .image,
       sourceApplication: "Screenshot",
@@ -4732,10 +4737,10 @@ struct ClipNestTests {
     #expect(
       L10n.format(
         "storage.error.keychain",
-        fallback: "The macOS Keychain could not provide ClipNest's local encryption key (%d).",
+        fallback: "The macOS Keychain could not provide Clipskein's local encryption key (%d).",
         language: "zh-Hans",
         -50
-      ) == "macOS 钥匙串无法提供 ClipNest 的本地加密密钥（-50）。"
+      ) == "macOS 钥匙串无法提供 Clipskein 的本地加密密钥（-50）。"
     )
   }
 
@@ -4752,9 +4757,13 @@ struct ClipNestTests {
 
     #expect(propertyList["LSUIElement"] == nil)
     #expect(propertyList["CFBundlePackageType"] as? String == "APPL")
+    #expect(propertyList["CFBundleDisplayName"] as? String == "Clipskein")
+    #expect(propertyList["CFBundleName"] as? String == "Clipskein")
+    #expect(propertyList["CFBundleExecutable"] as? String == "ClipNest")
+    #expect(propertyList["CFBundleIdentifier"] as? String == "app.clipnest.ClipNest")
     let urlTypes = try #require(propertyList["CFBundleURLTypes"] as? [[String: Any]])
     let schemes = urlTypes.flatMap { $0["CFBundleURLSchemes"] as? [String] ?? [] }
-    #expect(schemes == ["clipnest"])
+    #expect(schemes == ["clipskein", "clipnest"])
   }
 
   @Test func deepLinksNavigateOnlyThroughStrictBoundedCommands() throws {
@@ -4799,7 +4808,14 @@ struct ClipNestTests {
     ]
     for link in canonicalLinks {
       let url = try #require(link.url)
+      #expect(url.scheme == "clipskein")
       #expect(ClipNestDeepLink(url: url) == link)
+      var legacyComponents = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false))
+      legacyComponents.scheme = "clipnest"
+      let legacyURL = try #require(legacyComponents.url)
+      let legacyLink = try #require(ClipNestDeepLink(url: legacyURL))
+      #expect(legacyLink == link)
+      #expect(legacyLink.url == url)
     }
     #expect(ClipNestDeepLink.search(String(repeating: "x", count: 501)).url == nil)
     #expect(ClipNestDeepLink.board("").url == nil)
@@ -4813,7 +4829,7 @@ struct ClipNestTests {
     let store = ClipStore(rootURL: root, startsMonitoring: false, pasteboard: pasteboard)
 
     #expect(store.copyAutomationLink(.search("invoice total")))
-    #expect(pasteboard.string(forType: .string) == "clipnest://search?q=invoice%20total")
+    #expect(pasteboard.string(forType: .string) == "clipskein://search?q=invoice%20total")
     #expect(
       pasteboard.data(
         forType: NSPasteboard.PasteboardType(ClipboardCapturePolicy.autoGeneratedType)
@@ -7915,6 +7931,7 @@ struct ClipNestTests {
     )
     let report = diagnostics.report
 
+    #expect(report.hasPrefix("Clipskein diagnostics"))
     #expect(report.contains("Version: 1.2.3 (123)"))
     #expect(report.contains("History: 42 clips, 4 pinned, 2 in Stack"))
     #expect(report.contains("Storage health: Needs attention"))

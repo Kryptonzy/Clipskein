@@ -1,6 +1,6 @@
 # Commercial access safety contract
 
-Commercial access is intentionally dormant in ordinary and ad-hoc ClipNest builds. The app must
+Commercial access is intentionally dormant in ordinary and ad-hoc Clipskein builds. The app must
 remain fully usable and must not create a trial record, display a purchase prompt, or contact a
 licensing service until the release owner selects a provider and supplies a real production
 configuration.

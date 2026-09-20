@@ -2,6 +2,7 @@
 import PackageDescription
 
 let package = Package(
+    // Clipskein's internal names stay stable so resources and existing tooling still resolve.
     name: "ClipNest",
     defaultLocalization: "en",
     platforms: [.macOS(.v14)],

@@ -13,7 +13,7 @@ enum ClipNestDeepLink: Equatable, Sendable {
 
   var url: URL? {
     var components = URLComponents()
-    components.scheme = "clipnest"
+    components.scheme = "clipskein"
 
     switch self {
     case .open:
@@ -43,7 +43,8 @@ enum ClipNestDeepLink: Equatable, Sendable {
 
   init?(url: URL) {
     guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-      components.scheme?.lowercased() == "clipnest",
+      let scheme = components.scheme?.lowercased(),
+      scheme == "clipskein" || scheme == "clipnest",
       components.user == nil,
       components.password == nil,
       components.port == nil,

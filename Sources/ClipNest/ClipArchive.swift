@@ -18,18 +18,18 @@ enum ClipArchiveError: LocalizedError, Equatable {
         "archive.error.password_short", fallback: "Use a password with at least 8 characters.")
     case .invalidArchive:
       L10n.text(
-        "archive.error.invalid", fallback: "This file is not a valid ClipNest archive.")
+        "archive.error.invalid", fallback: "This file is not a valid Clipskein archive.")
     case .unsupportedVersion:
       L10n.text(
         "archive.error.unsupported",
-        fallback: "This archive was created by an unsupported ClipNest version.")
+        fallback: "This archive was created by an unsupported Clipskein version.")
     case .wrongPasswordOrCorruptArchive:
       L10n.text(
         "archive.error.password_or_damage",
         fallback: "The password is incorrect, or the archive is damaged.")
     case .randomGenerationFailed:
       L10n.text(
-        "archive.error.random", fallback: "ClipNest could not generate secure random data.")
+        "archive.error.random", fallback: "Clipskein could not generate secure random data.")
     case .missingLocalImage(let fileName):
       L10n.format(
         "archive.error.missing_image",
@@ -50,11 +50,11 @@ enum ClipArchiveError: LocalizedError, Equatable {
         "archive.recovery.password_short", fallback: "Choose a longer password and try again.")
     case .invalidArchive:
       L10n.text(
-        "archive.recovery.invalid", fallback: "Choose another .clipnestbackup file and try again.")
+        "archive.recovery.invalid", fallback: "Choose another .clipnestarchive file and try again.")
     case .unsupportedVersion:
       L10n.text(
         "archive.recovery.unsupported",
-        fallback: "Update ClipNest, then try importing this backup again.")
+        fallback: "Update Clipskein, then try importing this backup again.")
     case .wrongPasswordOrCorruptArchive:
       L10n.text(
         "archive.recovery.password_or_damage",
@@ -65,7 +65,7 @@ enum ClipArchiveError: LocalizedError, Equatable {
     case .missingLocalImage, .missingLocalRichText:
       L10n.text(
         "archive.recovery.missing_file",
-        fallback: "Open ClipNest storage to check the missing file, then create the backup again.")
+        fallback: "Open Clipskein storage to check the missing file, then create the backup again.")
     }
   }
 }
@@ -122,6 +122,7 @@ private struct ClipArchiveEnvelope: Codable {
 }
 
 enum ClipArchive {
+  // Keep the established backup format/extension readable across the Clipskein rename.
   static let fileExtension = "clipnestarchive"
   static let productionKeyIterations = 210_000
 

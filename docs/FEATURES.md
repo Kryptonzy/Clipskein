@@ -1,6 +1,6 @@
-# ClipNest feature reference
+# Clipskein feature reference
 
-A local-first macOS clipboard and screenshot memory. ClipNest watches the system clipboard, stores copied text, images, and file references on the Mac, runs OCR with Apple's Vision framework, and searches everything from one window.
+A local-first macOS clipboard and screenshot memory. Clipskein watches the system clipboard, stores copied text, images, and file references on the Mac, runs OCR with Apple's Vision framework, and searches everything from one window.
 
 This is the detailed inventory of implemented behavior. For setup, requirements, and known limitations, start with the [README](../README.md). A feature being implemented does not imply validation on every macOS version or third-party application.
 
@@ -69,7 +69,7 @@ This is the detailed inventory of implemented behavior. For setup, requirements,
 - In-place OCR retry from the safely stored original screenshot, with cold images loaded and decrypted off the main thread, preserving concealment while recognition is pending and restoring search/extraction without forcing another capture
 - Configurable global Screen OCR shortcut that selects a region from any app, saves it to searchable history, and copies recognized text
 - Pin clips, safely undo deletion or bulk clearing, and use standard Command–Z recovery
-- Local persistence in `~/Library/Application Support/ClipNest`
+- Local persistence in `~/Library/Application Support/ClipNest`, intentionally retained so existing installations keep their history through the display-name change
 - Menu bar controls alongside a normal Dock presence, ensuring the SwiftUI library window is created reliably on launch and can be reopened through standard macOS app activation
 - Cursor-adjacent quick picker with keyboard navigation, Return paste, and visible Command–1 through Command–8 direct-paste shortcuts
 - In-picker Command–Y preview for long text and screenshots, pairing the original image with selectable OCR text while keeping concealed clips hidden, preparing cold image previews off-main with visible progress, and validating complete file groups off-main before native Quick Look
@@ -120,11 +120,11 @@ This is the detailed inventory of implemented behavior. For setup, requirements,
 - Backward-compatible first-launch migration from legacy plaintext storage, using atomic replacement and fail-closed handling that never overwrites history when the key is unavailable or ciphertext integrity fails
 - Restrictive local file permissions in addition to encryption at rest
 - Visible storage-health warnings and retry controls for failed writes; unreadable history is preserved before starting fresh
-- Background storage inspection with exact on-disk usage, missing-attachment detection, and conservative cleanup that reclaims only unreferenced ClipNest-owned image or rich-text files
+- Background storage inspection with exact on-disk usage, missing-attachment detection, and conservative cleanup that reclaims only unreferenced Clipskein-owned image or rich-text files
 - Password-encrypted backup and idempotent merge import, including images, OCR, file references, Stack order, Pinboards, and saved views
 - Responsive encrypted backup and restore: attachment I/O, password derivation, encryption, decryption, and archive file I/O run off the main thread with visible progress and safe cancellation
-- No ClipNest account, telemetry, cloud storage, or third-party package dependencies; optional local translation may require macOS language-pack downloads
-- Strict, navigation-only `clipnest://` deep links for Shortcuts, Raycast, browsers, and local automation to open search, Quick Picker, snippets, Text Actions, or an existing Pinboard; Settings includes copyable examples plus safe custom search and Pinboard link builders, and marks generated copies so ClipNest never captures its own links, while bounded parsing rejects credentials, duplicate or unexpected parameters, extra paths, and content-mutating commands, and links can never read history, inject a clip, paste, delete, export, change privacy settings, or reveal concealed content
+- No Clipskein account, telemetry, cloud storage, or third-party package dependencies; optional local translation may require macOS language-pack downloads
+- Strict, navigation-only `clipskein://` deep links, with continued support for existing `clipnest://` links, for Shortcuts, Raycast, browsers, and local automation to open search, Quick Picker, snippets, Text Actions, or an existing Pinboard; Settings includes copyable examples plus safe custom search and Pinboard link builders, and marks generated copies so Clipskein never captures its own links, while bounded parsing rejects credentials, duplicate or unexpected parameters, extra paths, and content-mutating commands, and links can never read history, inject a clip, paste, delete, export, change privacy settings, or reveal concealed content
 - Process-safe single-instance launch: repeated opens focus the existing app instead of duplicating clipboard monitoring or global shortcuts
 - A support diagnostics report containing app and system versions, architecture, counts, and readiness states—not clipboard content, screenshots, filenames, paths, source apps, searches, or encryption keys
 - A dormant provider-neutral commercial-access foundation with Keychain-backed minimal state, bounded trials, offline grace, revocation handling, and clock-rollback protection; local builds stay fully enabled until a real provider is configured
