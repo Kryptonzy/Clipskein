@@ -4467,7 +4467,7 @@ struct ClipNestTests {
         "archive.import.panel_message",
         fallback: "Merge archive",
         language: "zh-Hans"
-      ).contains("现有历史不会被替换")
+      ).contains("仍遵循历史容量和保留期限设置")
     )
     #expect(
       L10n.text(

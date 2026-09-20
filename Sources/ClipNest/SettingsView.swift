@@ -1311,7 +1311,7 @@ struct SettingsView: View {
               Text(
                 t(
                   "settings.about.diagnostics.privacy",
-                  "The copied report contains counts and readiness states only—never clipboard contents, screenshots, filenames, paths, apps, searches, or encryption keys."
+                  "The copied report contains app and system versions, architecture, counts, and readiness states—not clipboard contents, screenshots, filenames, paths, apps, searches, or encryption keys."
                 )
               )
               .font(.caption)

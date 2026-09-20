@@ -14,6 +14,7 @@ enum ArchiveController {
   }
 
   static func exportArchive(from store: ClipStore) {
+    do { try store.requireArchiveStorageAccess() } catch { showError(error); return }
     guard operationTask == nil else {
       showOperationAlreadyRunning()
       return
@@ -61,6 +62,7 @@ enum ArchiveController {
   }
 
   static func importArchive(into store: ClipStore) {
+    do { try store.requireArchiveStorageAccess() } catch { showError(error); return }
     guard operationTask == nil else {
       showOperationAlreadyRunning()
       return
@@ -71,7 +73,7 @@ enum ArchiveController {
     panel.message = L10n.text(
       "archive.import.panel_message",
       fallback:
-        "Choose an encrypted ClipNest archive to merge. Your current history will not be replaced."
+        "Choose an encrypted ClipNest archive to merge with your history. Your history size and retention limits still apply."
     )
     guard panel.runModal() == .OK, let url = panel.url else { return }
     guard let password = requestPassword(confirm: false) else { return }
@@ -102,7 +104,7 @@ enum ArchiveController {
           detail: L10n.format(
             "archive.import.success_detail",
             fallback:
-              "Added %d clips, merged %d, restored %d Stack items, %d Pinboards, and %d saved views; skipped %d invalid entries. Current history was kept.",
+              "Added %d clips, merged %d, restored %d Stack items, %d Pinboards, and %d saved views; skipped %d invalid entries. History size and retention limits apply.",
             result.added,
             result.merged,
             result.stacked,

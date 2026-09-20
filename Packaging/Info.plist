@@ -47,6 +47,6 @@
   <key>NSScreenCaptureUsageDescription</key>
   <string>ClipNest captures only the screen region you select so it can recognize and copy text locally.</string>
   <key>NSHumanReadableCopyright</key>
-  <string>Copyright © 2026 ClipNest. All rights reserved.</string>
+  <string>Copyright © 2026 Kong Zhiyang. MIT License.</string>
 </dict>
 </plist>

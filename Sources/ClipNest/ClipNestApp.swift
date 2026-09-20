@@ -76,9 +76,11 @@ struct ClipNestApp: App {
         Button(L10n.text("menu.export_backup", fallback: "Export encrypted backup…")) {
           ArchiveController.exportArchive(from: store)
         }
+        .disabled(!store.canPerformArchiveOperations)
         Button(L10n.text("menu.import_backup", fallback: "Import encrypted backup…")) {
           ArchiveController.importArchive(into: store)
         }
+        .disabled(!store.canPerformArchiveOperations)
         Divider()
         Button(
           store.isMonitoring
@@ -161,6 +163,7 @@ struct ClipNestApp: App {
           ArchiveController.importArchive(into: store)
         }
       }
+      .disabled(!store.canPerformArchiveOperations)
       Divider()
       Button(
         store.isMonitoring

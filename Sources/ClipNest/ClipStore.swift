@@ -457,6 +457,9 @@ final class ClipStore: ObservableObject {
   private var historyPersistenceNeeded = false
   private var historyPersistenceGeneration = 0
   private var historyPersistenceErrorMessage: String?
+  private var isApplyingArchiveImport = false
+  private var archiveRetainedImageNames = Set<String>()
+  private var archiveRetainedRichTextNames = Set<String>()
   private var newSnippetDraftPersistenceTask: Task<Void, Never>?
   private var newSnippetDraftPersistenceNeeded = false
   private var newSnippetDraftPersistenceGeneration = 0
@@ -4650,8 +4653,8 @@ final class ClipStore: ObservableObject {
     storageInventoryTask?.cancel()
     isInspectingStorage = true
     let rootURL = rootURL
-    let imageNames = Set(items.compactMap(\.imageFileName))
-    let richTextNames = Set(items.compactMap(\.richTextFileName))
+    let imageNames = Set(items.compactMap(\.imageFileName)).union(archiveRetainedImageNames)
+    let richTextNames = Set(items.compactMap(\.richTextFileName)).union(archiveRetainedRichTextNames)
     storageInventoryTask = Task { [weak self] in
       let inventory = await Task.detached(priority: .utility) {
         StorageInventoryScanner.scan(
@@ -4672,8 +4675,8 @@ final class ClipStore: ObservableObject {
     isInspectingStorage = false
     isCleaningStorage = true
     let rootURL = rootURL
-    let imageNames = Set(items.compactMap(\.imageFileName))
-    let richTextNames = Set(items.compactMap(\.richTextFileName))
+    let imageNames = Set(items.compactMap(\.imageFileName)).union(archiveRetainedImageNames)
+    let richTextNames = Set(items.compactMap(\.richTextFileName)).union(archiveRetainedRichTextNames)
     storageInventoryTask = Task { [weak self] in
       let result = await Task.detached(priority: .utility) {
         StorageInventoryScanner.removeUnusedFiles(
@@ -5164,10 +5167,27 @@ final class ClipStore: ObservableObject {
 
   func exportURL() -> URL { rootURL }
 
+  var canPerformArchiveOperations: Bool {
+    isSessionActive && !isUnlockingStorage && !persistenceBlockedByUnreadableHistory
+      && (!requiresStorageProtection || storageProtector != nil)
+  }
+
+  func requireArchiveStorageAccess() throws {
+    guard canPerformArchiveOperations else {
+      throw PersistenceWriteError(
+        message: isUnlockingStorage
+          ? L10n.text("storage.unlocking_detail", fallback: "Local history is still unlocking.")
+          : (storageIssue?.detail
+            ?? L10n.text("storage.history_blocked", fallback: "History cannot be opened safely"))
+      )
+    }
+  }
+
   func makeEncryptedArchive(
     password: String,
     keyIterations: Int = ClipArchive.productionKeyIterations
   ) throws -> Data {
+    try requireArchiveStorageAccess()
     purgeExpired()
     return try Self.makeEncryptedArchive(
       from: archiveExportSnapshot(),
@@ -5180,6 +5200,7 @@ final class ClipStore: ObservableObject {
     password: String,
     keyIterations: Int = ClipArchive.productionKeyIterations
   ) async throws -> Data {
+    try requireArchiveStorageAccess()
     purgeExpired()
     let snapshot = archiveExportSnapshot()
     return try await Self.performCancellableBackgroundWork {
@@ -5308,21 +5329,63 @@ final class ClipStore: ObservableObject {
   }
 
   func importEncryptedArchive(_ data: Data, password: String) throws -> ArchiveImportSummary {
+    try requireArchiveStorageAccess()
+    // The synchronous API cannot wait for another snapshot without blocking its
+    // main-actor completion. The UI uses the asynchronous API below.
+    guard !hasPendingHistoryPersistence else {
+      throw PersistenceWriteError(message: L10n.text(
+        "archive.progress.busy_detail", fallback: "Finish the current save before importing."
+      ))
+    }
     let payload = try ClipArchive.open(data: data, password: password)
-    return try importArchivePayload(payload)
+    let summary = try importArchivePayload(payload)
+    do {
+      try persistArchiveHistorySynchronously()
+      try persistArchiveCollections()
+      resumePendingImageAnalysis()
+      return summary
+    } catch {
+      setPersistenceIssue(error)
+      throw error
+    }
   }
 
   func importEncryptedArchiveInBackground(_ data: Data, password: String) async throws
     -> ArchiveImportSummary
   {
+    try requireArchiveStorageAccess()
     let payload = try await Self.performCancellableBackgroundWork {
       try ClipArchive.open(data: data, password: password)
     }
     try Task.checkCancellation()
-    return try importArchivePayload(payload)
+    await flushPendingHistoryPersistence()
+    try Task.checkCancellation()
+    try requireArchiveStorageAccess()
+    let summary = try importArchivePayload(payload)
+    persist()
+    await flushPendingHistoryPersistence()
+    do {
+      try requireArchiveStorageAccess()
+      if let message = historyPersistenceErrorMessage {
+        throw PersistenceWriteError(message: message)
+      }
+      try persistArchiveCollections()
+      resumePendingImageAnalysis()
+      return summary
+    } catch {
+      // Keep the merged in-memory state so Retry Saving can recover it. Reverting
+      // here could overwrite captures made while the background writer was busy.
+      setPersistenceIssue(error)
+      throw error
+    }
   }
 
   private func importArchivePayload(_ payload: ClipArchivePayload) throws -> ArchiveImportSummary {
+    try requireArchiveStorageAccess()
+    archiveRetainedImageNames.formUnion(items.compactMap(\.imageFileName))
+    archiveRetainedRichTextNames.formUnion(items.compactMap(\.richTextFileName))
+    isApplyingArchiveImport = true
+    defer { isApplyingArchiveImport = false }
     let importDate = Date()
     purgeExpired(now: importDate)
     var added = 0
@@ -5388,6 +5451,7 @@ final class ClipStore: ObservableObject {
               )
             } catch {
               setPersistenceIssue(error)
+              throw error
             }
           }
           items[existingIndex].richTextData = nil
@@ -5430,7 +5494,7 @@ final class ClipStore: ObservableObject {
             importedRichTextFileName = try writeRichTextData(archivedRichText, for: newID)
           } catch {
             setPersistenceIssue(error)
-            importedRichTextFileName = nil
+            throw error
           }
         } else {
           importedRichTextFileName = nil
@@ -5456,8 +5520,7 @@ final class ClipStore: ObservableObject {
         } catch {
           try? fileManager.removeItem(at: destination)
           setPersistenceIssue(error)
-          skipped += 1
-          continue
+          throw error
         }
         imported = copyOf(
           archived,
@@ -5502,11 +5565,6 @@ final class ClipStore: ObservableObject {
       boardIDMap: boardMerge.idMap
     )
     selectedID = items.first?.id
-    persist()
-    persistStack()
-    persistSavedViews()
-    persistBoards()
-    resumePendingImageAnalysis()
     return ArchiveImportSummary(
       added: added,
       merged: merged,
@@ -5515,6 +5573,32 @@ final class ClipStore: ObservableObject {
       savedViews: importedSavedViewCount,
       boards: boardMerge.importedCount
     )
+  }
+
+  private func persistArchiveHistorySynchronously() throws {
+    try requireArchiveStorageAccess()
+    try prepareStorage()
+    let stagingURL = rootURL.appendingPathComponent(".clips-\(UUID().uuidString).pending")
+    defer { try? fileManager.removeItem(at: stagingURL) }
+    if let error = historyMetadataWriter(items, stagingURL, storageProtector, requiresStorageProtection) {
+      historyPersistenceErrorMessage = error.message
+      throw error
+    }
+    if fileManager.fileExists(atPath: metadataURL.path) {
+      _ = try fileManager.replaceItemAt(metadataURL, withItemAt: stagingURL)
+    } else {
+      try fileManager.moveItem(at: stagingURL, to: metadataURL)
+    }
+    historyPersistenceErrorMessage = nil
+    releaseArchiveAttachments(afterSaving: items)
+  }
+
+  private func persistArchiveCollections() throws {
+    try requireArchiveStorageAccess()
+    try prepareStorage()
+    try writeProtectedData(JSONEncoder().encode(stackIDs), to: stackURL)
+    try writeProtectedData(JSONEncoder().encode(savedViews), to: savedViewsURL)
+    try writeProtectedData(JSONEncoder().encode(boards), to: boardsURL)
   }
 
   private func mergeArchivedBoards(_ archivedBoards: [ClipBoard]) -> (
@@ -6125,7 +6209,7 @@ final class ClipStore: ObservableObject {
   }
 
   private func persist() {
-    guard !persistenceBlockedByUnreadableHistory else { return }
+    guard !persistenceBlockedByUnreadableHistory, !isApplyingArchiveImport else { return }
     if persistsHistoryInBackground {
       historyPersistenceNeeded = true
       startPendingHistoryPersistence()
@@ -6135,8 +6219,11 @@ final class ClipStore: ObservableObject {
       try prepareStorage()
       let data = try JSONEncoder().encode(items)
       try writeProtectedData(data, to: metadataURL)
+      historyPersistenceErrorMessage = nil
+      releaseArchiveAttachments(afterSaving: items)
       if storageIssue?.kind == .persistence { storageIssue = nil }
     } catch {
+      historyPersistenceErrorMessage = error.localizedDescription
       setPersistenceIssue(error)
     }
   }
@@ -6185,6 +6272,7 @@ final class ClipStore: ObservableObject {
             self.storageIssue = nil
           }
           self.historyPersistenceErrorMessage = nil
+          self.releaseArchiveAttachments(afterSaving: snapshot)
         } catch {
           try? self.fileManager.removeItem(at: stagingURL)
           let writeError = PersistenceWriteError(message: error.localizedDescription)
@@ -6334,7 +6422,7 @@ final class ClipStore: ObservableObject {
   }
 
   private func persistStack() {
-    guard !persistenceBlockedByUnreadableHistory else { return }
+    guard !persistenceBlockedByUnreadableHistory, !isApplyingArchiveImport else { return }
     do {
       try prepareStorage()
       let data = try JSONEncoder().encode(stackIDs)
@@ -6346,7 +6434,7 @@ final class ClipStore: ObservableObject {
   }
 
   private func persistSavedViews() {
-    guard !persistenceBlockedByUnreadableHistory else { return }
+    guard !persistenceBlockedByUnreadableHistory, !isApplyingArchiveImport else { return }
     do {
       try prepareStorage()
       let data = try JSONEncoder().encode(savedViews)
@@ -6358,7 +6446,7 @@ final class ClipStore: ObservableObject {
   }
 
   private func persistBoards() {
-    guard !persistenceBlockedByUnreadableHistory else { return }
+    guard !persistenceBlockedByUnreadableHistory, !isApplyingArchiveImport else { return }
     do {
       try prepareStorage()
       let data = try JSONEncoder().encode(boards)
@@ -6594,12 +6682,36 @@ final class ClipStore: ObservableObject {
       item.richTextFileName.map { richTextURL.appendingPathComponent($0) },
     ].compactMap { $0 }
     for url in storedURLs where fileManager.fileExists(atPath: url.path) {
+      if url.deletingLastPathComponent() == imagesURL,
+        archiveRetainedImageNames.contains(url.lastPathComponent) { continue }
+      if url.deletingLastPathComponent() == richTextURL,
+        archiveRetainedRichTextNames.contains(url.lastPathComponent) { continue }
       do {
         try fileManager.removeItem(at: url)
       } catch {
         setPersistenceIssue(error)
       }
     }
+  }
+
+  private func releaseArchiveAttachments(afterSaving snapshot: [ClipItem]) {
+    guard !archiveRetainedImageNames.isEmpty || !archiveRetainedRichTextNames.isEmpty else { return }
+    // A failed import must not delete files still referenced by the last good
+    // history. Only a committed snapshot can make these files disposable.
+    let savedImages = Set(snapshot.compactMap(\.imageFileName))
+    let currentImages = Set(items.compactMap(\.imageFileName))
+    let savedRichText = Set(snapshot.compactMap(\.richTextFileName))
+    let currentRichText = Set(items.compactMap(\.richTextFileName))
+    let imageReferences = savedImages.union(currentImages)
+    let richTextReferences = savedRichText.union(currentRichText)
+    let removableImages = archiveRetainedImageNames.subtracting(imageReferences)
+    let removableRichText = archiveRetainedRichTextNames.subtracting(richTextReferences)
+    for name in removableImages { try? fileManager.removeItem(at: imagesURL.appendingPathComponent(name)) }
+    for name in removableRichText { try? fileManager.removeItem(at: richTextURL.appendingPathComponent(name)) }
+    archiveRetainedImageNames.subtract(removableImages)
+    archiveRetainedRichTextNames.subtract(removableRichText)
+    archiveRetainedImageNames.subtract(savedImages.intersection(currentImages))
+    archiveRetainedRichTextNames.subtract(savedRichText.intersection(currentRichText))
   }
 
   private func cacheImageData(_ data: Data, fileName: String) {

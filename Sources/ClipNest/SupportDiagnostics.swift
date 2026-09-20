@@ -59,7 +59,7 @@ struct SupportDiagnostics: Equatable, Sendable {
     New Snippet shortcut: \(newSnippetShortcut)
     Text Actions shortcut: \(textActionShortcut)
 
-    Privacy note: This report contains counts and readiness states only. It does not include clipboard text, OCR text, images, filenames, file paths, source applications, tags, aliases, search queries, or encryption keys.
+    Privacy note: This report contains app and system versions, architecture, counts, and readiness states. It does not include clipboard text, OCR text, images, filenames, file paths, source applications, tags, aliases, search queries, or encryption keys.
     """
   }
 

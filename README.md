@@ -2,8 +2,6 @@
 
 A local-first macOS clipboard and screenshot library. Save copied text, images, and file references, recognize screenshot text, and retrieve it from a keyboard-driven picker.
 
-ClipNest is an independent implementation. It does not use BiBimba's code, branding, or assets. This repository contains a working local application, not a notarized commercial release.
-
 ## What it does
 
 - Captures text, validated rich text, images (including original animated GIFs), and file references.
@@ -31,9 +29,11 @@ The minimum deployment target is not a claim that every OS and hardware combinat
 
 ## Build and run
 
-From this directory:
+Clone the repository and build the app:
 
 ```bash
+git clone https://github.com/Kryptonzy/ClipNest.git
+cd ClipNest
 zsh build-app.sh
 open dist/ClipNest.app
 ```
@@ -62,7 +62,11 @@ Live data is stored in `~/Library/Application Support/ClipNest`; the encryption 
 
 Clipboard monitoring necessarily sees content copied by other applications. Configure exclusions and privacy rules in Settings. Automatic secret detection is heuristic and cannot guarantee recognition of every sensitive value. Deliberate copy, paste, drag, and export actions place the selected data outside the encrypted store.
 
+Backup imports merge into the library and still follow your history size and retention limits. Import is not an all-or-nothing transaction across history, attachments, and collections: a failed operation can leave partial changes. Keep the original backup, resolve the reported storage problem, retry saving or importing, and verify the result after relaunch before discarding the backup.
+
 ## Project status
+
+ClipNest is an early-stage macOS application available as source. Build locally using the instructions above; there is no notarized app download yet.
 
 Automatic updates are not integrated. Payments, license activation, and trial enforcement are not connected to a provider; ordinary builds remain fully enabled. A successful local signature check does not mean the app is notarized or approved by Gatekeeper for distribution.
 
@@ -73,3 +77,9 @@ Automatic updates are not integrated. Payments, license activation, and trial en
 - [Dormant commercial-access design](docs/COMMERCIAL_ACCESS.md)
 
 Source code lives in `Sources/ClipNest`, regression tests in `Tests/ClipNestTests`, and bundle metadata and icon assets in `Packaging`. Build output and local application data should not be committed.
+
+## Contributing and license
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and pull requests, and [SECURITY.md](SECURITY.md) for private vulnerability reports.
+
+Code, documentation, and the included icon assets are distributed under the [MIT license](LICENSE). The icon's generation record is kept in [Packaging/ICON_PROMPT.md](Packaging/ICON_PROMPT.md).

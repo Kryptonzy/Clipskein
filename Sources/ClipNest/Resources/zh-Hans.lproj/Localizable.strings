@@ -1103,9 +1103,9 @@
 "notice.expired_clips" = "已移除 %d 条到期的临时记录";
 "archive.export.default_name" = "ClipNest 备份.%@";
 "archive.export.panel_message" = "保存包含完整 ClipNest 历史的加密备份。";
-"archive.import.panel_message" = "选择要合并的 ClipNest 加密备份；现有历史不会被替换。";
+"archive.import.panel_message" = "选择要与现有历史合并的 ClipNest 加密备份。合并后仍遵循历史容量和保留期限设置。";
 "archive.import.success_title" = "备份已导入";
-"archive.import.success_detail" = "新增 %d 条记录，合并 %d 条，恢复 %d 个暂存栈项目、%d 个收藏板和 %d 个视图；跳过 %d 个无效项目。现有历史已保留。";
+"archive.import.success_detail" = "新增 %d 条记录，合并 %d 条，恢复 %d 个暂存栈项目、%d 个收藏板和 %d 个视图；跳过 %d 个无效项目。历史容量和保留期限设置仍适用。";
 "archive.password" = "密码";
 "archive.confirm_password" = "确认密码";
 "archive.protect_title" = "保护此备份";
@@ -1210,7 +1210,7 @@
 "settings.about.storage_health" = "存储状态";
 "settings.about.ready" = "正常";
 "settings.about.attention" = "需要处理";
-"settings.about.diagnostics.privacy" = "复制的报告只包含数量和就绪状态，绝不包含剪贴板内容、截图、文件名、路径、应用、搜索或加密密钥。";
+"settings.about.diagnostics.privacy" = "复制的报告包含应用与系统版本、处理器架构、数量和就绪状态，不包含剪贴板内容、截图、文件名、路径、应用、搜索或加密密钥。";
 "settings.about.diagnostics.copy" = "复制诊断信息";
 "settings.about.diagnostics.copied" = "诊断信息已复制";
 "settings.about.show_storage" = "显示本机存储位置";

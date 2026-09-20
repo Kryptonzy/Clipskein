@@ -1,0 +1,43 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: Tests and development build
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Ensure localization checker dependency
+        run: command -v rg >/dev/null || brew install ripgrep
+      - name: Localization
+        run: ./scripts/check-localizations.sh
+      - name: Compile application and tests
+        run: swift build --build-tests
+      - name: Functional regression tests
+        timeout-minutes: 3
+        run: swift test --skip-build --skip 'maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency|maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot'
+      - name: Isolated semantic performance test
+        timeout-minutes: 2
+        run: swift test --skip-build --filter maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
+      - name: Isolated persistence performance test
+        timeout-minutes: 2
+        run: swift test --skip-build --filter maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot
+      - name: Build and verify local app
+        run: ./build-app.sh

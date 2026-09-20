@@ -61,7 +61,7 @@ Use the packaged app in a disposable macOS account or with a backup of existing 
 3. Capture a region, recognize its text, and exercise screenshot-inbox permission recovery. Check cancellation and a missing source file.
 4. Use Quick Picker with Chinese/Japanese/Korean text composition, dismiss it, and try paste-back with Accessibility allowed and denied.
 5. Conceal a clip, lock/unlock the Mac, and verify previews and sensitive clipboard actions follow the privacy settings.
-6. Create an encrypted backup, restore into a disposable history, and confirm text, images, Pinboards, and file references survive.
+6. Create an encrypted backup, restore into a disposable history, relaunch, and confirm text, images, Pinboards, and file references survive. Check the history capacity and retention settings before importing; the merged library still follows those limits. Verify that a locked/unreadable store rejects archive operations and that a save failure reports an error instead of successful import.
 7. Upgrade a previously signed build using the same identity. Confirm encrypted history unlocks and existing permissions remain usable.
 8. On supported systems, test translation with missing language packs and Apple Intelligence with its model unavailable as well as available.
 

@@ -1103,9 +1103,9 @@
 "notice.expired_clips" = "Expired %d temporary clips";
 "archive.export.default_name" = "ClipNest Backup.%@";
 "archive.export.panel_message" = "Save an encrypted backup of your complete ClipNest history.";
-"archive.import.panel_message" = "Choose an encrypted ClipNest archive to merge. Your current history will not be replaced.";
+"archive.import.panel_message" = "Choose an encrypted ClipNest archive to merge with your history. Your history size and retention limits still apply.";
 "archive.import.success_title" = "Archive imported";
-"archive.import.success_detail" = "Added %d clips, merged %d, restored %d Stack items, %d Pinboards, and %d saved views; skipped %d invalid entries. Current history was kept.";
+"archive.import.success_detail" = "Added %d clips, merged %d, restored %d Stack items, %d Pinboards, and %d saved views; skipped %d invalid entries. History size and retention limits apply.";
 "archive.password" = "Password";
 "archive.confirm_password" = "Confirm password";
 "archive.protect_title" = "Protect this backup";
@@ -1210,7 +1210,7 @@
 "settings.about.storage_health" = "Storage health";
 "settings.about.ready" = "Ready";
 "settings.about.attention" = "Needs attention";
-"settings.about.diagnostics.privacy" = "The copied report contains counts and readiness states only—never clipboard contents, screenshots, filenames, paths, apps, searches, or encryption keys.";
+"settings.about.diagnostics.privacy" = "The copied report contains app and system versions, architecture, counts, and readiness states—not clipboard contents, screenshots, filenames, paths, apps, searches, or encryption keys.";
 "settings.about.diagnostics.copy" = "Copy diagnostics";
 "settings.about.diagnostics.copied" = "Diagnostics copied";
 "settings.about.show_storage" = "Show local storage";
