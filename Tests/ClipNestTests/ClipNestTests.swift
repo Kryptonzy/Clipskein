@@ -180,6 +180,34 @@ private final class ThreadObservation: @unchecked Sendable {
   }
 }
 
+private final class ScreenshotStageGate: @unchecked Sendable {
+  private let lock = NSLock()
+  private let semaphore = DispatchSemaphore(value: 0)
+  private var entered = false
+  private var finishedWaiting = false
+  private var timedOut = false
+
+  func waitForMainActorRelease() {
+    lock.lock()
+    entered = true
+    lock.unlock()
+    // A regression that executes this on MainActor must fail, not hang forever.
+    let result = semaphore.wait(timeout: .now() + 5)
+    lock.lock()
+    finishedWaiting = true
+    timedOut = result == .timedOut
+    lock.unlock()
+  }
+
+  var state: (entered: Bool, finishedWaiting: Bool, timedOut: Bool) {
+    lock.lock()
+    defer { lock.unlock() }
+    return (entered, finishedWaiting, timedOut)
+  }
+
+  func release() { semaphore.signal() }
+}
+
 private final class ControllableStoredImageLoader: @unchecked Sendable {
   private let release = DispatchSemaphore(value: 0)
   private let observation = ThreadObservation()
@@ -3806,6 +3834,12 @@ struct ClipNestTests {
     ])
     let observation = ThreadObservation()
     let writeObservation = ThreadObservation()
+    let decodeGate = ScreenshotStageGate()
+    let writeGate = ScreenshotStageGate()
+    defer {
+      decodeGate.release()
+      writeGate.release()
+    }
     let png = testPNGData()
     let store = ClipStore(
       rootURL: root,
@@ -3814,12 +3848,12 @@ struct ClipNestTests {
       screenshotDirectoryURL: inbox,
       screenshotImageDataLoader: { _ in
         observation.recordIsMainThread()
-        Thread.sleep(forTimeInterval: 0.25)
+        decodeGate.waitForMainActorRelease()
         return png
       },
       clipboardImageWriter: { data, url, _, _ in
         writeObservation.recordIsMainThread()
-        Thread.sleep(forTimeInterval: 0.25)
+        writeGate.waitForMainActorRelease()
         do {
           try data.write(to: url, options: .atomic)
           return nil
@@ -3831,15 +3865,30 @@ struct ClipNestTests {
     )
 
     await store.pollScreenshotFolder(now: modifiedAt.addingTimeInterval(2))
-    let startedAt = ProcessInfo.processInfo.systemUptime
     let poll = Task { @MainActor in
       await store.pollScreenshotFolder(now: modifiedAt.addingTimeInterval(2))
     }
-    try await Task.sleep(for: .milliseconds(20))
-    let mainActorDelay = ProcessInfo.processInfo.systemUptime - startedAt
+
+    for _ in 0..<500 where !decodeGate.state.entered {
+      try await Task.sleep(for: .milliseconds(5))
+    }
+    #expect(decodeGate.state.entered)
+    #expect(!decodeGate.state.finishedWaiting,
+      "MainActor must reach this checkpoint while decoding is still blocked")
+    decodeGate.release()
+
+    for _ in 0..<500 where !writeGate.state.entered {
+      try await Task.sleep(for: .milliseconds(5))
+    }
+    #expect(writeGate.state.entered)
+    #expect(!writeGate.state.finishedWaiting,
+      "MainActor must reach this checkpoint while writing is still blocked")
+    writeGate.release()
     await poll.value
 
-    #expect(mainActorDelay < 0.15)
+    #expect(!decodeGate.state.timedOut)
+    #expect(!writeGate.state.timedOut)
+    #expect(observation.callCount == 1)
     #expect(!observation.observedMainThread)
     #expect(writeObservation.callCount == 1)
     #expect(!writeObservation.observedMainThread)
