@@ -48,11 +48,13 @@ For verification:
 
 ```bash
 zsh scripts/check-localizations.sh
-swift test --skip maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
-swift test --filter maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
+swift build --build-tests
+swift test --skip-build --skip 'maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency|maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot'
+swift test --skip-build --filter maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
+swift test --skip-build --filter maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot
 ```
 
-The performance test runs separately because concurrent embedding tests can distort its latency measurement. See [building and verification](docs/BUILDING.md) for environment diagnostics and the manual smoke-test checklist.
+Compile once, then run functional tests and the two performance tests separately so concurrent work does not distort search or persistence latency. CI allows three minutes for functional tests and two minutes for each isolated performance test, excluding compilation. Optional system-embedding integration tests report an explicit skip for each unavailable language; the missing-model fallback test always runs. See [building and verification](docs/BUILDING.md) for environment diagnostics and the manual smoke-test checklist.
 
 ## Data and privacy
 

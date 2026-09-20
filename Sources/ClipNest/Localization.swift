@@ -4,10 +4,11 @@ enum L10n {
   static func text(
     _ key: String,
     fallback: String,
-    language: String? = nil
+    language: String? = nil,
+    resourceBundle: Bundle = .module
   ) -> String {
     let requestedLanguage = language ?? preferredLanguage()
-    let bundle = localizedBundle(for: requestedLanguage) ?? .module
+    let bundle = localizedBundle(for: requestedLanguage, in: resourceBundle) ?? resourceBundle
     return bundle.localizedString(forKey: key, value: fallback, table: "Localizable")
   }
 
@@ -23,7 +24,11 @@ enum L10n {
   }
 
   static var availableLanguages: [String] {
-    Bundle.module.localizations.filter { $0 != "Base" }.sorted()
+    availableLanguages(in: .module)
+  }
+
+  static func availableLanguages(in bundle: Bundle) -> [String] {
+    Array(Set(resourceLanguages(in: bundle).map(canonicalLanguageIdentifier))).sorted()
   }
 
   static func preferredLanguage(
@@ -44,18 +49,28 @@ enum L10n {
     return storedLanguages?.first ?? systemLanguages.first
   }
 
-  private static func localizedBundle(for language: String?) -> Bundle? {
+  private static func localizedBundle(for language: String?, in bundle: Bundle) -> Bundle? {
     guard let language else { return nil }
-    let normalized = language.replacingOccurrences(of: "_", with: "-").lowercased()
-    let matchedLanguage = availableLanguages.sorted { $0.count > $1.count }.first { available in
-      let candidate = available.lowercased()
+    let normalized = canonicalLanguageIdentifier(language).lowercased()
+    // Match canonical identifiers, but keep the resource's actual spelling for its path.
+    // SwiftPM versions differ in whether they preserve script casing in .lproj names.
+    let matchedLanguage = resourceLanguages(in: bundle).sorted { $0.count > $1.count }.first { available in
+      let candidate = canonicalLanguageIdentifier(available).lowercased()
       return normalized == candidate
         || normalized.hasPrefix("\(candidate)-")
         || candidate.hasPrefix("\(normalized)-")
     }
     guard let matchedLanguage,
-      let path = Bundle.module.path(forResource: matchedLanguage, ofType: "lproj")
+      let path = bundle.path(forResource: matchedLanguage, ofType: "lproj")
     else { return nil }
     return Bundle(path: path)
+  }
+
+  private static func resourceLanguages(in bundle: Bundle) -> [String] {
+    bundle.localizations.filter { $0.caseInsensitiveCompare("Base") != .orderedSame }
+  }
+
+  private static func canonicalLanguageIdentifier(_ language: String) -> String {
+    Locale.canonicalLanguageIdentifier(from: language.replacingOccurrences(of: "_", with: "-"))
   }
 }

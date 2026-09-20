@@ -35,14 +35,20 @@ Use `security find-identity -v -p codesigning` to inspect locally available iden
 ```bash
 for script in build-app.sh release-app.sh run.sh scripts/*.sh; do zsh -n "$script" || exit; done
 zsh scripts/check-localizations.sh
-swift test --skip maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
-swift test --filter maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
+swift build --build-tests
+swift test --skip-build --skip 'maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency|maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot'
+swift test --skip-build --filter maximumHistoryMeaningIndexHasBoundedColdAndWarmLatency
+swift test --skip-build --filter maximumHistoryPersistenceIsCoalescedOffMainAndFlushesLatestSnapshot
 zsh build-app.sh
 codesign --verify --deep --strict --verbose=2 dist/ClipNest.app
 plutil -lint dist/ClipNest.app/Contents/Info.plist
 ```
 
-The isolated performance test measures the 5,000-item meaning-search index without concurrent tests competing for Apple's embedding resources. Record the actual toolchain, host OS, test results, and binary checksum for a release candidate rather than treating previously recorded counts as current evidence.
+Compile the application and tests first, then use `--skip-build` for all three test runs. The meaning-search benchmark and the coalesced-persistence benchmark each run alone, keeping their existing latency limits while avoiding interference from the functional suite. In CI, functional tests have a three-minute step timeout and each performance test has a two-minute timeout; compilation has its own preceding step so it does not consume those test limits.
+
+The AppKit integration suite runs serially because its cases share process-level pasteboard services and semantic caches. `@MainActor` alone permits different async tests to interleave. This test isolation does not remove concurrency exercised inside an individual test, and is not a claim that every possible application-level concurrency issue has been ruled out.
+
+English and Simplified Chinese integration tests check Apple's optional word-embedding resources independently. If a language model is absent, its test reports an explicit skip with the language named. When the resource is present, the actual semantic results must still pass. The injected missing-model fallback test always runs and verifies that unavailable models produce an explicit unavailable result with no indexed documents or stale hits. Record both passed and skipped tests, the actual toolchain, host OS, and binary checksum for a release candidate rather than treating previously recorded counts as current evidence.
 
 The localization gate checks valid string-file syntax, duplicate keys, English/Chinese parity, and common hard-coded UI literals. It is a targeted check, not a complete translation or accessibility audit. `codesign --verify` checks signature integrity; it does not replace notarization or a Gatekeeper assessment.
 

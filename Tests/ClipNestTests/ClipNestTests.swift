@@ -218,6 +218,10 @@ private final class OCRResultSequence: @unchecked Sendable {
   }
 }
 
+// These integration tests share AppKit services, the pasteboard, and system caches.
+// MainActor isolation alone still lets separate tests interleave across awaits.
+// Keep test cases serial; concurrency probes inside each case remain concurrent.
+@Suite(.serialized)
 @MainActor
 struct ClipNestTests {
   @Test func searchIncludesOCRAndSourceApplication() throws {
@@ -8974,7 +8978,13 @@ struct ClipNestTests {
     #expect(!store.findSimilar(to: concealedOrigin))
   }
 
-  @Test func systemMeaningVectorsPreferRelatedEnglishAndChineseMemories() throws {
+  @Test(
+    .enabled(
+      if: SystemEmbeddingTestResources.englishWordEmbeddingAvailable,
+      "Apple's optional English word embedding is unavailable on this host."
+    )
+  )
+  func systemMeaningVectorsPreferRelatedEnglishMemories() throws {
     let vectorizer = SystemSemanticVectorizer.shared
     let englishQuery = try #require(vectorizer.vector(for: "invoice amount"))
     let englishRelated = try #require(vectorizer.vector(for: "restaurant receipt total payment"))
@@ -8982,7 +8992,19 @@ struct ClipNestTests {
     let englishRelatedScore = try #require(englishQuery.similarity(to: englishRelated))
     let englishUnrelatedScore = try #require(englishQuery.similarity(to: englishUnrelated))
     #expect(englishRelatedScore > englishUnrelatedScore)
+    print(
+      "ClipNest semantic benchmark: English related/unrelated = \(englishRelatedScore)/\(englishUnrelatedScore)"
+    )
+  }
 
+  @Test(
+    .enabled(
+      if: SystemEmbeddingTestResources.simplifiedChineseWordEmbeddingAvailable,
+      "Apple's optional Simplified Chinese word embedding is unavailable on this host."
+    )
+  )
+  func systemMeaningVectorsPreferRelatedChineseMemories() throws {
+    let vectorizer = SystemSemanticVectorizer.shared
     let chineseQuery = try #require(vectorizer.vector(for: "编译失败"))
     let chineseRelated = try #require(vectorizer.vector(for: "构建错误需要修复"))
     let chineseUnrelated = try #require(vectorizer.vector(for: "小猫在沙发上睡觉"))
@@ -8990,7 +9012,7 @@ struct ClipNestTests {
     let chineseUnrelatedScore = try #require(chineseQuery.similarity(to: chineseUnrelated))
     #expect(chineseRelatedScore > chineseUnrelatedScore)
     print(
-      "ClipNest semantic benchmark: English related/unrelated = \(englishRelatedScore)/\(englishUnrelatedScore), Chinese = \(chineseRelatedScore)/\(chineseUnrelatedScore)"
+      "ClipNest semantic benchmark: Chinese related/unrelated = \(chineseRelatedScore)/\(chineseUnrelatedScore)"
     )
   }
 
